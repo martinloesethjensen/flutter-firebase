@@ -1,0 +1,28 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2020-02-13T21:39:47+01:00",
+  "id": "flutter-firebase-workshop",
+  "duration": 0,
+  "title": "Flutter Firebase Codelab",
+  "authors": "Martin Løseth Jensen",
+  "summary": "Add Firebase to Your Flutter App",
+  "source": "codelab.md",
+  "theme": "",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "flutter",
+    "dart",
+    "firebase"
+  ],
+  "tags": [
+    "firebase",
+    "flutter"
+  ],
+  "feedback": "https://github.com/martinloesethjensen/flutter-firebase/issues/new",
+  "url": "flutter-firebase-workshop"
+}
