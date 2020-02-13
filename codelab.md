@@ -30,3 +30,5 @@ Have the project downloaded from GitHub.
 
 Be able to run Flutter on either a simulator or physical device.
 
+See the official prerequisites on the [Firebase documentation](https://firebase.google.com/docs/flutter/setup#prerequisites) 
+
