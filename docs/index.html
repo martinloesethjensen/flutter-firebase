@@ -28,10 +28,9 @@
                   feedback-link="https://github.com/martinloesethjensen/flutter-firebase/issues/new">
     
       <google-codelab-step label="Overview" duration="0">
-        <p>In this workshop I wan&#39;t to show how to implement Firebase into a Flutter app.</p>
-<p>We will build on top of an existing todo app and implement simple interacting between the database and the app. Such as creating, reading, updating, and deleting a task.</p>
-<p>I will show how to setup up the app with Firebase and how to create a Firebase project.</p>
-<p>I will not show anything more than Firebase&#39;s Firestore which is the database we will use in this codelab.</p>
+        <p>In this codelab we want to show how to implement Firebase into a Flutter app.</p>
+<p>We will build a chat app where users can log in / sign in with Firebase, interact with Firestore, upload images to Firebase Storage, push notifications and analytics.</p>
+<p>We will show how to setup up the app with Firebase and how to create a Firebase project.</p>
 
 
       </google-codelab-step>
@@ -43,10 +42,53 @@
       </google-codelab-step>
     
       <google-codelab-step label="Prerequisite" duration="0">
-        <p>Have a Google account that you will use for login to Firebase.</p>
-<p>Have the project downloaded from GitHub.</p>
-<p>Be able to run Flutter on either a simulator or physical device.</p>
-<p>See the official prerequisites on the <a href="https://firebase.google.com/docs/flutter/setup#prerequisites" target="_blank">Firebase documentation</a></p>
+        <p>Have a Google account that you will use for login to Firebase.<br>See the official prerequisites on the <a href="https://firebase.google.com/docs/flutter/setup#prerequisites" target="_blank">Firebase documentation</a></p>
+<p>To follow along you can download the project from GitHub.<br>TODO: Have url for download on GH</p>
+<p>Be able to run Flutter on either a simulator or physical device.<br>You can follow the steps in the Flutter website: <a href="https://flutter.dev/docs/get-started" target="_blank">Getting Started</a></p>
+<aside class="special"><p>It is importent to note that if you need to run an Android emulator then you need to install and <a href="https://flutter.dev/docs/get-started/install/macos#set-up-the-android-emulator" target="_blank">setup up the Android emulator in Android Studio</a></p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a Flutter Project" duration="0">
+        <p>When you have <a href="https://flutter.dev/docs/get-started/install" target="_blank">Flutter setup</a> on your computer then you are ready to create the Flutter project.</p>
+<p>With this simple simple Flutter command you will create a sample / &#34;skeleton&#34; app and will be able to run right after creation.</p>
+<pre><code>flutter create flutter_firebase_chat
+</code></pre>
+<p>You can run the app from the terminal or run it in an IDE such as Android Studio, Intellij IDEA or VS Code (these editors has plugins for Flutter and dart support).<br>In the terminal navigate to the newly created project, <code>flutter_firebase_chat</code>, and run the <code>flutter run</code> command.</p>
+<pre><code>cd flutter_firebase_chat
+flutter run
+</code></pre>
+<aside class="special"><p><strong>Note:</strong> you need to have a device or emulator connected / started for the app to run.<br>You can find <a href="https://gist.github.com/martinloesethjensen/8b53ec97834aaea2622d57ec94d3fb5e" target="_blank">useful Flutter commands here</a>.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Create a Firebase Project" duration="0">
+        <p>TODO: add images and instructions</p>
+<p>If you don&#39;t already have a Firebase account, then you can create one <a href="https://firebase.google.com/pricing/" target="_blank">here</a>. We will not be needing a paid plan for this codelab.</p>
+<ol type="1">
+<li>Sign in to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a></li>
+<li>Go ahead and click &#34;Add project&#34;</li>
+</ol>
+<p class="image-container"><img alt="Screenshot 2020-03-28 at 00.19.02" src="img/4e391bdaaf1d2f0.png"></p>
+<ol type="1">
+<li>Enable Google Analytics<br><img alt="firebase-step-2" src="img/66f26f7b448461e6.png"></li>
+<li>You can then choose to either configure Google Analytics with existing Google Analytics account or create a new account name.</li>
+</ol>
+<p class="image-container"><img alt="firebase-step-3" src="img/86bea040f39f1be0.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Configure the Platforms" duration="0">
+        <p>dhsbds</p>
+<h2 is-upgraded>Android Configuration</h2>
+<p>dsjnds</p>
+<h2 is-upgraded>iOS Configuration</h2>
+<p>Dsjdnjs</p>
 
 
       </google-codelab-step>
