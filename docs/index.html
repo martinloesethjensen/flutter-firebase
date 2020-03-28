@@ -35,17 +35,11 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="About Firebase" duration="0">
-        <p>TODO: write about Firebase</p>
-
-
-      </google-codelab-step>
-    
       <google-codelab-step label="Prerequisite" duration="0">
         <p>Have a Google account that you will use for login to Firebase.<br>See the official prerequisites on the <a href="https://firebase.google.com/docs/flutter/setup#prerequisites" target="_blank">Firebase documentation</a></p>
 <p>To follow along you can download the project from GitHub.<br>TODO: Have url for download on GH</p>
 <p>Be able to run Flutter on either a simulator or physical device.<br>You can follow the steps in the Flutter website: <a href="https://flutter.dev/docs/get-started" target="_blank">Getting Started</a></p>
-<aside class="special"><p>It is importent to note that if you need to run an Android emulator then you need to install and <a href="https://flutter.dev/docs/get-started/install/macos#set-up-the-android-emulator" target="_blank">setup up the Android emulator in Android Studio</a></p>
+<aside class="special"><p>It is important to note that if you need to run an Android emulator then you need to install and <a href="https://flutter.dev/docs/get-started/install/macos#set-up-the-android-emulator" target="_blank">setup up the Android emulator in Android Studio</a></p>
 </aside>
 
 
@@ -66,9 +60,45 @@ flutter run
 
       </google-codelab-step>
     
+      <google-codelab-step label="Build the User Interface" duration="0">
+        <p>In this section, you&#39;ll begin modifying the default sample app into a chat app. The goal is to use <a href="https://flutter.io/" target="_blank">Flutter</a> to build Friendlychat, a simple, extensible chat app with these features:</p>
+<ul>
+<li>The app displays text messages in real time.</li>
+<li>Users can enter a text string message and send it either by pressing the return key or the <strong>Send</strong> icon.</li>
+<li>The UI runs on both iOS and Android devices.</li>
+</ul>
+<p>TODO: Screenshot</p>
+<h2 is-upgraded>Create the main app scaffold</h2>
+<p>The first element you&#39;ll add is a simple <a href="https://www.google.com/design/spec/layout/structure.html#structure-app-bar" target="_blank">app bar</a> that shows a static title for the app. As you progress through subsequent sections of this codelab, you&#39;ll incrementally add more responsive and stateful UI elements to the app.</p>
+<p>The <code>main.dart</code> file is located under the <code>lib</code> directory in your Flutter project and contains the <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank"><br>main()</a> function that starts the execution of your app.</p>
+<p>The <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank"><br>main()</a> and <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function definitions are the same as in the default app. The <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function takes as its argument a <a href="https://docs.flutter.io/flutter/widgets/Widget-class.html" target="_blank"><br>Widget</a> which the Flutter framework expands and displays to the screen of the app at run time. Since the app uses Material Design elements in the UI, create a new <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank"><br>MaterialApp</a> object and pass it to the <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function; this widget becomes the root of your widget tree.</p>
+<h2 is-upgraded><a href="https://github.com/flutter/friendlychat-steps/blob/master/offline_steps/step_1_main_user_interface/lib/main.dart" target="_blank"><br>main.dart</a></h2>
+<pre><code>// Replace the code in main.dart with the following.
+
+import &#39;package:flutter/material.dart&#39;;
+
+void main() {
+  runApp(
+    new MaterialApp(
+      title: &#34;Friendlychat&#34;,
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text(&#34;Friendlychat&#34;),
+        ),
+      ),
+    ),
+  );
+}
+</code></pre>
+<p>To specify the default screen that users see in your app, set the <code>home</code> argument in your <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank"><br>MaterialApp</a> definition. The <code>home</code> argument references a widget that defines the main UI for this app. The widget consists of a <a href="http://docs.flutter.io/flutter/material/Scaffold-class.html" target="_blank"><br>Scaffold</a> widget that has a simple <a href="http://docs.flutter.io/flutter/material/AppBar/AppBar.html" target="_blank"><br>AppBar</a> as its child widget.</p>
+<p>If you run the app, you should see a single screen that looks like this.</p>
+<p>TODO: Screenshot</p>
+
+
+      </google-codelab-step>
+    
       <google-codelab-step label="Create a Firebase Project" duration="0">
-        <p>TODO: add images and instructions</p>
-<p>If you don&#39;t already have a Firebase account, then you can create one <a href="https://firebase.google.com/pricing/" target="_blank">here</a>. We will not be needing a paid plan for this codelab.</p>
+        <p>If you don&#39;t already have a Firebase account, then you can create one <a href="https://firebase.google.com/pricing/" target="_blank">here</a>. We will not be needing a paid plan for this codelab.</p>
 <ol type="1">
 <li>Sign in to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a></li>
 <li>Go ahead and click &#34;Add project&#34;</li>
@@ -84,11 +114,12 @@ flutter run
       </google-codelab-step>
     
       <google-codelab-step label="Configure the Platforms" duration="0">
-        <p>dhsbds</p>
+        <p>The next step for us to do is configure one or more apps to our Firebase project. We will do this by registering the app&#39;s bundle ID with Firebase and then generate config files to put in the our project.</p>
+<p class="image-container"><img alt="configure-platforms" src="img/c1c1ae5c346a3f41.png"></p>
 <h2 is-upgraded>Android Configuration</h2>
-<p>dsjnds</p>
+<p>You can find a detailed description on how to <a href="https://firebase.google.com/docs/flutter/setup?platform=android" target="_blank">add Firebase to your Flutter app with Android configuration</a>.</p>
 <h2 is-upgraded>iOS Configuration</h2>
-<p>Dsjdnjs</p>
+<p>You can find a detailed description on how to <a href="https://firebase.google.com/docs/flutter/setup?platform=ios" target="_blank">add Firebase to your Flutter app with iOS configuration</a>.</p>
 
 
       </google-codelab-step>
