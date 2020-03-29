@@ -213,20 +213,91 @@ void main() {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Build the User Interface" duration="0">
-        <p>TODO:</p>
+      <google-codelab-step label="Build the Chat Screen" duration="0">
+        <p>Now we will create the chat screen. but first let us create another folder in the <code>lib</code> folder called <code>screens</code>. This folder will have files that specific to screens. In this case we will create a file called <code>chat_screen.dart</code>.</p>
+<p>The <code>ChatScreen</code> class will be a <a href="https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html" target="_blank">StatefulWidget</a> as we will be inputting text from the keyboard.</p>
+<pre><code>import &#39;package:flutter/material.dart&#39;;
 
+class ChatScreen extends StatefulWidget {
+  @override
+  _ChatScreenState createState() =&gt; _ChatScreenState();
+}
 
-      </google-codelab-step>
-    
-      <google-codelab-step label="Add UI for Composing Messages" duration="0">
-        <p>TODO:</p>
+class _ChatScreenState extends State&lt;ChatScreen&gt; {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(&#34;Chats&#34;)),
+    );
+  }
+}
 
+</code></pre>
+<p>In <code>main.dart</code> we will change the <code>home</code> parameter in <code>MaterialApp(...)</code>.</p>
+<pre><code>home: ChatScreen(),
+</code></pre>
+<p>Now run and check that you see the chat screen.</p>
+<p>We want our design to look more or less like the design.</p>
+<p>Design:</p>
+<p class="image-container"><img alt="chat_screen_design" src="img/260c3a870a633934.png"></p>
+<p>We know it will have a keyboard so we will initialize <code>TextEditingController</code> as a field in the class <code>_ChatScreenState</code>.</p>
+<pre><code>final TextEditingController _textMessageController = TextEditingController();
+</code></pre>
+<p>Then we will create a method <code>_buildMessageComposer()</code> where our input UI will be build.</p>
+<pre><code>_buildMessageComposer() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      height: 70.0,
+      color: Colors.white,
+      child: Row(
+        children: &lt;Widget&gt;[
+          RawMaterialButton(
+            onPressed: () {},
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+              size: 25.0,
+            ),
+            shape: CircleBorder(),
+            elevation: 2.0,
+            fillColor: Theme.of(context).primaryColor,
+            padding: EdgeInsets.all(15.0),
+          ),
+          Expanded(
+            child: TextField(
+		  				controller: _textMessageController,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: (value) {},
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10.0),
+                  ),
+                ),
+                hintText: &#39;Type your message...&#39;,
+                filled: true,
+                hintStyle: TextStyle(color: Colors.grey[400]),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.send),
+            iconSize: 25.0,
+            color: Theme.of(context).primaryColor,
+            onPressed: () {},
+          ),
+        ],
+      ),
+    );
+  }
 
-      </google-codelab-step>
-    
-      <google-codelab-step label="Add UI for Displaying Messages" duration="0">
-        <p>TODO:</p>
+</code></pre>
+<p>We will then have the <code>Scaffoldbody</code> parameter to be the <code>_buildMessageComposer()</code>.</p>
+<pre><code>body: _buildMessageComposer(),
+</code></pre>
+<p>Now run the app.</p>
+<p>The screen should now look like this:</p>
+<p class="image-container"><img alt="chat_screen_01" src="img/37f1435f081bcb9d.png"></p>
 
 
       </google-codelab-step>

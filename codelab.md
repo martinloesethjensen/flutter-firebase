@@ -246,17 +246,114 @@ Run the app and see that the changes should look like this:
 
 ![app_drawer](/Users/mlj/Dropbox/projects/flutter-firebase/img/app_drawer.png)
 
-## Build the User Interface
+## Build the Chat Screen
 
-TODO:
+Now we will create the chat screen. but first let us create another folder in the `lib` folder called `screens`. This folder will have files that specific to screens. In this case we will create a file called `chat_screen.dart`. 
 
-## Add UI for Composing Messages
+The `ChatScreen` class will be a [StatefulWidget](https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html) as we will be inputting text from the keyboard.
 
-TODO:
+```dart
+import 'package:flutter/material.dart';
 
-## Add UI for Displaying Messages
+class ChatScreen extends StatefulWidget {
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
 
-TODO:
+class _ChatScreenState extends State<ChatScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Chats")),
+    );
+  }
+}
+
+```
+
+In `main.dart` we will change the `home` parameter in `MaterialApp(...)`.
+
+```dart
+home: ChatScreen(),
+```
+
+Now run and check that you see the chat screen.
+
+We want our design to look more or less like the design.
+
+Design:
+
+![chat_screen_design](/Users/mlj/Dropbox/projects/flutter-firebase/img/chat_screen_design.png)
+
+We know it will have a keyboard so we will initialize `TextEditingController` as a field in the class `_ChatScreenState`.
+
+```dart
+final TextEditingController _textMessageController = TextEditingController();
+```
+
+Then we will create a method `_buildMessageComposer()` where our input UI will be build. 
+
+```dart
+_buildMessageComposer() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
+      height: 70.0,
+      color: Colors.white,
+      child: Row(
+        children: <Widget>[
+          RawMaterialButton(
+            onPressed: () {},
+            child: Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+              size: 25.0,
+            ),
+            shape: CircleBorder(),
+            elevation: 2.0,
+            fillColor: Theme.of(context).primaryColor,
+            padding: EdgeInsets.all(15.0),
+          ),
+          Expanded(
+            child: TextField(
+		  				controller: _textMessageController,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: (value) {},
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10.0),
+                  ),
+                ),
+                hintText: 'Type your message...',
+                filled: true,
+                hintStyle: TextStyle(color: Colors.grey[400]),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.send),
+            iconSize: 25.0,
+            color: Theme.of(context).primaryColor,
+            onPressed: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+```
+
+We will then have the `Scaffold` `body` parameter to be the `_buildMessageComposer()`.
+
+```dart
+body: _buildMessageComposer(),
+```
+
+Now run the app.
+
+The screen should now look like this:
+
+![chat_screen_01](/Users/mlj/Dropbox/projects/flutter-firebase/img/chat_screen_01.png)
 
 ## Apply Finnishing Touches
 
