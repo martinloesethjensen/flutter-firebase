@@ -81,7 +81,7 @@ void main() {
 <p>In the terminal you can use this command:</p>
 <pre><code>rm -r test/
 </code></pre>
-<p>Now we will create a new folder in the <code>lib</code> folder. Let us name the folder <code>helpers</code>, and the purpose of this folder is to have files with code that will be used througout the project. Such an example could be constants like colours.</p>
+<p>Now we will create a new folder in the <code>lib</code> folder. Let us name the folder <code>helpers</code>, and the purpose of this folder is to have files with code that will be used throughout the project. Such an example could be constants like colours.</p>
 <p>You can do it via the terminal, folder or IDE.</p>
 <p>In the terminal you can use this command:</p>
 <pre><code>cd lib
@@ -90,6 +90,58 @@ mkdir helpers
 <p>While we are at it we will make a new dart file in that folder, <code>app_constants.dart</code>.</p>
 <p>Your structure should look like this.</p>
 <p class="image-container"><img alt="folder_structure_01" src="img/f4c3251491688f63.png"></p>
+<p>In <code>app_constants.dart</code> we will create a class called <code>AppConstants</code> which will have <code>static</code> fields that we can access throughout the app.</p>
+<pre><code>import &#39;package:flutter/material.dart&#39;;
+
+class AppConstants {
+  static const String APP_PRIMARY_COLOR = &#34;#EB342E&#34;;
+  static const String APP_BACKGROUND_COLOR = &#34;#F6F8F9&#34;;
+  static const String APP_BACKGROUND_COLOR_WHITE = &#34;#FFFFFF&#34;;
+  static const String APP_PRIMARY_COLOR_LIGHT = &#34;#9f9f9f&#34;;
+  static const String APP_PRIMARY_COLOR_BLACK = &#34;#000000&#34;;
+  static const String APP_PRIMARY_FONT_COLOR_WHITE = &#34;#FFFFFF&#34;;
+  static const String APP_PRIMARY_COLOR_ACTION = &#34;#BC2923&#34;;
+  static const String APP_PRIMARY_ROOM_COLOR = &#34;#707070&#34;;
+  static const String APP_PRIMARY_COLOR_GREEN = &#34;#009099&#34;;
+  static const String APP_BACKGROUND_COLOR_GRAY = &#34;#D0D0D0&#34;;
+
+  static Color hexToColor(String code) {
+    return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
+  }
+}
+
+</code></pre>
+<p>Now we will update the theme of the app with the colors we want. We have our colors in the <code>AppConstants</code>class.<br>We update the <code>theme</code> field in the <code>MaterialApp(...)</code> in our <code>main.dart</code> file.</p>
+<p>Remember to import app_constants: <code>import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;</code></p>
+<pre><code>import &#39;package:flutter/material.dart&#39;;
+import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;  
+ 
+void main() {
+  runApp(
+    MaterialApp(
+      title: &#34;GDG Firebase chat&#34;,
+      theme: ThemeData(
+        primaryColor: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+        backgroundColor:
+            AppConstants.hexToColor(AppConstants.APP_BACKGROUND_COLOR),
+        primaryColorLight:
+            AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_LIGHT),
+        accentColor: Colors.black,
+        accentIconTheme: IconThemeData(color: Colors.black),
+        dividerColor: Colors.black12,
+        textTheme: TextTheme(
+          caption: TextStyle(color: Colors.white),
+        ),
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(&#34;GDG Firebase chat&#34;),
+        ),
+      ),
+    ),
+  );
+}
+</code></pre>
 
 
       </google-codelab-step>

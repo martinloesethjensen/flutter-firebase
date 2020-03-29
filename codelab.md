@@ -108,10 +108,10 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String APP_PRIMARY_COLOR = "#EB342E";
   static const String APP_BACKGROUND_COLOR = "#F6F8F9";
-  static const String APP_BACKGROUND_COLOR_White = "#FFFFFF";
-  static const String APP_Primary_ColorLight = "#9f9f9f";
-  static const String APP_Primary_FontColorBlack = "#000000";
-  static const String APP_Primary_FontColorWhite = "#FFFFFF";
+  static const String APP_BACKGROUND_COLOR_WHITE = "#FFFFFF";
+  static const String APP_PRIMARY_COLOR_LIGHT = "#9f9f9f";
+  static const String APP_PRIMARY_COLOR_BLACK = "#000000";
+  static const String APP_PRIMARY_FONT_COLOR_WHITE = "#FFFFFF";
   static const String APP_PRIMARY_COLOR_ACTION = "#BC2923";
   static const String APP_PRIMARY_ROOM_COLOR = "#707070";
   static const String APP_PRIMARY_COLOR_GREEN = "#009099";
@@ -120,6 +120,43 @@ class AppConstants {
   static Color hexToColor(String code) {
     return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
   }
+}
+
+```
+
+Now we will update the theme of the app with the colors we want. We have our colors in the `AppConstants`class.
+We update the `theme` field in the `MaterialApp(...)` in our `main.dart` file.
+
+Remember to import app_constants in the import section in the top of the file.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';  
+ 
+void main() {
+  runApp(
+    MaterialApp(
+      title: "GDG Firebase chat",
+      theme: ThemeData(
+        primaryColor: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+        backgroundColor:
+            AppConstants.hexToColor(AppConstants.APP_BACKGROUND_COLOR),
+        primaryColorLight:
+            AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_LIGHT),
+        accentColor: Colors.black,
+        accentIconTheme: IconThemeData(color: Colors.black),
+        dividerColor: Colors.black12,
+        textTheme: TextTheme(
+          caption: TextStyle(color: Colors.white),
+        ),
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("GDG Firebase chat"),
+        ),
+      ),
+    ),
+  );
 }
 ```
 
