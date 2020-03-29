@@ -33,7 +33,7 @@ Positive
 
 When you have [Flutter setup](https://flutter.dev/docs/get-started/install) on your computer then you are ready to create the Flutter project. 
 
-With this simple simple Flutter command you will create a sample / "skeleton" app and will be able to run right after creation.
+With this simple Flutter command you will create a sample / "skeleton" app and will be able to run right after creation.
 
 ```bash
 flutter create gdg_flutter_firebase_chat
@@ -284,7 +284,7 @@ Design:
 
 ![chat_screen_design](/Users/mlj/Dropbox/projects/flutter-firebase/img/chat_screen_design.png)
 
-We know it will have a keyboard so we will initialize `TextEditingController` as a field in the class `_ChatScreenState`.
+We know the screen will have a text field so we will initialize a `TextEditingController` as a field in the class `_ChatScreenState`.
 
 ```dart
 bool _isComposing = false;  // Being used later to determine when TextEditingController is used to compose a message.
@@ -343,7 +343,7 @@ _buildMessageComposer() {
 
 ```
 
-We will then have the `Scaffold` `body` parameter to be the `_buildMessageComposer()`.
+We will then have the `Scaffold`  `body` parameter to be the `_buildMessageComposer()`.
 
 ```dart
 body: _buildMessageComposer(),
@@ -454,6 +454,8 @@ List<Message> messages = [
 
 In our `chat_screen.dart` we create a new method `_buildMessage()` for our messages.
 
+`isMe` will be used later so when know how the styling of a message should be. With this we know what messages have been sent from who.
+
 ```dart
 _buildMessage(Message message, bool isMe) {
     final Widget msg = Padding(
@@ -520,7 +522,7 @@ _buildMessage(Message message, bool isMe) {
     );
 ```
 
-Remember to import the necessary import.
+Remember to import the necessary packages, files and classes.
 
 ```dart
 import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';
@@ -540,11 +542,34 @@ Our `build()` method should now also iterate over the list of messages.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
+      body: ListView.builder(
+        reverse: true,
+        padding: EdgeInsets.only(top: 15.0),
+        itemCount: _messages.length,
+        itemBuilder: (BuildContext context, int index) {
+          final Message message = _messages[index];
+          final bool isMe = message.sender.id == currentUser.id;
+
+          return _buildMessage(message, isMe);
+        },
+      ),
+    );
+  }
+```
+
+Run and see how it looks. 
+To make the list fit the screen with the text field where we compose messages, then we need to "expand" the view of the list. 
+
+```dart
+@override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Chats")),
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
+        onTap: () => FocusScope.of(context).unfocus(),  // Will hide the keyboard when the user touches the messages list view.
         child: Column(
           children: <Widget>[
-            Expanded(
+            Expanded(  // Expand widget to fill the available space
               child: Container(
                 child: ListView.builder(
                   reverse: true,

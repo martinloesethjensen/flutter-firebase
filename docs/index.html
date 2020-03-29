@@ -47,7 +47,7 @@
     
       <google-codelab-step label="Create a Flutter Project" duration="0">
         <p>When you have <a href="https://flutter.dev/docs/get-started/install" target="_blank">Flutter setup</a> on your computer then you are ready to create the Flutter project.</p>
-<p>With this simple simple Flutter command you will create a sample / &#34;skeleton&#34; app and will be able to run right after creation.</p>
+<p>With this simple Flutter command you will create a sample / &#34;skeleton&#34; app and will be able to run right after creation.</p>
 <pre><code>flutter create gdg_flutter_firebase_chat
 </code></pre>
 <p>You can run the app from the terminal or run it in an IDE such as Android Studio, Intellij IDEA or VS Code (these editors has plugins for Flutter and dart support).<br>In the terminal navigate to the newly created project, <code>gdg_flutter_firebase_chat</code>, and run the <code>flutter run</code> command.</p>
@@ -240,7 +240,7 @@ class _ChatScreenState extends State&lt;ChatScreen&gt; {
 <p>We want our design to look more or less like the design.</p>
 <p>Design:</p>
 <p class="image-container"><img alt="chat_screen_design" src="img/260c3a870a633934.png"></p>
-<p>We know it will have a keyboard so we will initialize <code>TextEditingController</code> as a field in the class <code>_ChatScreenState</code>.</p>
+<p>We know the screen will have a text field so we will initialize a <code>TextEditingController</code> as a field in the class <code>_ChatScreenState</code>.</p>
 <pre><code>bool _isComposing = false;  // Being used later to determine when TextEditingController is used to compose a message.
 final TextEditingController _textMessageController = TextEditingController();
 </code></pre>
@@ -390,6 +390,7 @@ List&lt;Message&gt; messages = [
 </code></pre>
 <h2 is-upgraded>Messages UI in Chat Screen</h2>
 <p>In our <code>chat_screen.dart</code> we create a new method <code>_buildMessage()</code> for our messages.</p>
+<p><code>isMe</code> will be used later so when know how the styling of a message should be. With this we know what messages have been sent from who.</p>
 <pre><code>_buildMessage(Message message, bool isMe) {
     final Widget msg = Padding(
       padding: EdgeInsets.all(8.0),
@@ -454,7 +455,7 @@ List&lt;Message&gt; messages = [
       ),
     );
 </code></pre>
-<p>Remember to import the necessary import.</p>
+<p>Remember to import the necessary packages, files and classes.</p>
 <pre><code>import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;
 import &#39;package:gdg_flutter_firebase_chat/models/message.dart&#39;;
 </code></pre>
@@ -466,11 +467,30 @@ import &#39;package:gdg_flutter_firebase_chat/models/message.dart&#39;;
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(&#34;Chats&#34;)),
+      body: ListView.builder(
+        reverse: true,
+        padding: EdgeInsets.only(top: 15.0),
+        itemCount: _messages.length,
+        itemBuilder: (BuildContext context, int index) {
+          final Message message = _messages[index];
+          final bool isMe = message.sender.id == currentUser.id;
+
+          return _buildMessage(message, isMe);
+        },
+      ),
+    );
+  }
+</code></pre>
+<p>Run and see how it looks.<br>To make the list fit the screen with the text field where we compose messages, then we need to &#34;expand&#34; the view of the list.</p>
+<pre><code>@override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(&#34;Chats&#34;)),
       body: GestureDetector(
-        onTap: () =&gt; FocusScope.of(context).unfocus(),
+        onTap: () =&gt; FocusScope.of(context).unfocus(),  // Will hide the keyboard when the user touches the messages list view.
         child: Column(
           children: &lt;Widget&gt;[
-            Expanded(
+            Expanded(  // Expand widget to fill the available space
               child: Container(
                 child: ListView.builder(
                   reverse: true,
@@ -524,12 +544,12 @@ import &#39;package:gdg_flutter_firebase_chat/models/message.dart&#39;;
 <li>Sign in to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a></li>
 <li>Go ahead and click &#34;Add project&#34;</li>
 </ol>
-<p class="image-container"><img alt="Screenshot 2020-03-28 at 00.19.02" src="img/4e391bdaaf1d2f0.png"></p>
+<p class="image-container"><img alt="Screenshot 2020-03-28 at 00.19.02" src="img/f24f114b7017ed5a.png"></p>
 <ol type="1">
-<li>Enable Google Analytics<br><img alt="firebase-step-2" src="img/66f26f7b448461e6.png"></li>
+<li>Enable Google Analytics<br><img alt="firebase-step-2" src="img/4c00875caba0994.png"></li>
 <li>You can then choose to either configure Google Analytics with existing Google Analytics account or create a new account name.</li>
 </ol>
-<p class="image-container"><img alt="firebase-step-3" src="img/86bea040f39f1be0.png"></p>
+<p class="image-container"><img alt="firebase-step-3" src="img/4b0e225e063f2aa9.png"></p>
 
 
       </google-codelab-step>
