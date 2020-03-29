@@ -70,9 +70,8 @@ flutter run
 <p>TODO: Screenshot</p>
 <h2 is-upgraded>Create the main app scaffold</h2>
 <p>The first element you&#39;ll add is a simple <a href="https://www.google.com/design/spec/layout/structure.html#structure-app-bar" target="_blank">app bar</a> that shows a static title for the app. As you progress through subsequent sections of this codelab, you&#39;ll incrementally add more responsive and stateful UI elements to the app.</p>
-<p>The <code>main.dart</code> file is located under the <code>lib</code> directory in your Flutter project and contains the <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank"><br>main()</a> function that starts the execution of your app.</p>
-<p>The <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank"><br>main()</a> and <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function definitions are the same as in the default app. The <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function takes as its argument a <a href="https://docs.flutter.io/flutter/widgets/Widget-class.html" target="_blank"><br>Widget</a> which the Flutter framework expands and displays to the screen of the app at run time. Since the app uses Material Design elements in the UI, create a new <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank"><br>MaterialApp</a> object and pass it to the <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank"><br>runApp()</a> function; this widget becomes the root of your widget tree.</p>
-<h2 is-upgraded><a href="https://github.com/flutter/friendlychat-steps/blob/master/offline_steps/step_1_main_user_interface/lib/main.dart" target="_blank"><br>main.dart</a></h2>
+<p>The <code>main.dart</code> file is located under the <code>lib</code> directory in your Flutter project and contains the <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank">main()</a> function that starts the execution of your app.</p>
+<p>The <a href="https://www.dartlang.org/docs/dart-up-and-running/ch02.html#the-main-function" target="_blank">main()</a> and <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank">runApp()</a> function definitions are the same as in the default app. The <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank">runApp()</a> function takes as its argument a <a href="https://docs.flutter.io/flutter/widgets/Widget-class.html" target="_blank">Widget</a> which the Flutter framework expands and displays to the screen of the app at run time. Since the app uses Material Design elements in the UI, create a new <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank">MaterialApp</a> object and pass it to the <a href="http://docs.flutter.io/flutter/widgets/runApp.html" target="_blank">runApp()</a> function; this widget becomes the root of your widget tree.</p>
 <pre><code>// Replace the code in main.dart with the following.
 
 import &#39;package:flutter/material.dart&#39;;
@@ -90,9 +89,238 @@ void main() {
   );
 }
 </code></pre>
-<p>To specify the default screen that users see in your app, set the <code>home</code> argument in your <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank"><br>MaterialApp</a> definition. The <code>home</code> argument references a widget that defines the main UI for this app. The widget consists of a <a href="http://docs.flutter.io/flutter/material/Scaffold-class.html" target="_blank"><br>Scaffold</a> widget that has a simple <a href="http://docs.flutter.io/flutter/material/AppBar/AppBar.html" target="_blank"><br>AppBar</a> as its child widget.</p>
+<p>To specify the default screen that users see in your app, set the <code>home</code> argument in your <a href="http://docs.flutter.io/flutter/material/MaterialApp/MaterialApp.html" target="_blank">MaterialApp</a> definition. The <code>home</code> argument references a widget that defines the main UI for this app. The widget consists of a <a href="http://docs.flutter.io/flutter/material/Scaffold-class.html" target="_blank">Scaffold</a> widget that has a simple <a href="http://docs.flutter.io/flutter/material/AppBar/AppBar.html" target="_blank">AppBar</a> as its child widget.</p>
 <p>If you run the app, you should see a single screen that looks like this.</p>
 <p>TODO: Screenshot</p>
+<h2 is-upgraded>Build the Chat Screen</h2>
+<p>To lay the groundwork for interactive components, you&#39;ll break the simple app into two different subclasses of widget: a root-level <code>FriendlychatApp</code> widget that never changes, and a child <code>ChatScreen</code> widget that can rebuild when messages are sent and internal state changes. For now, both these classes can extend <a href="https://docs.flutter.io/flutter/widgets/StatelessWidget-class.html" target="_blank"><br>StatelessWidget</a>. Later, we&#39;ll modify <code>ChatScreen</code> to extend <a href="https://docs.flutter.io/flutter/widgets/StatefulWidget-class.html" target="_blank"><br>StatefulWidget</a> and manage state.</p>
+<pre><code>// Replace the code in main.dart with the following.
+
+import &#39;package:flutter/material.dart&#39;;
+
+void main() {
+  runApp(new FriendlychatApp());
+}
+
+class FriendlychatApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: &#34;Friendlychat&#34;,
+      home: new ChatScreen(),
+    );
+  }
+}
+
+class ChatScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(title: new Text(&#34;Friendlychat&#34;)),
+    );
+  }
+}
+</code></pre>
+<p>This step introduces several key concepts of the Flutter framework:</p>
+<ul>
+<li>You describe the part of the user interface represented by a widget in its build method. The framework calls the <code>build()</code> methods for <code>FriendlychatApp</code> or <code>ChatScreen</code> when inserting these widgets into the widget hierarchy and when their dependencies change.</li>
+<li><a href="https://api.dartlang.org/stable/1.24.2/dart-core/override-constant.html" target="_blank">@override</a> is a Dart annotation that indicates that the tagged method overrides a superclass&#39;s method.</li>
+<li>Some widgets, like <a href="https://docs.flutter.io/flutter/material/Scaffold-class.html" target="_blank">Scaffold</a> and <a href="https://docs.flutter.io/flutter/material/AppBar-class.html" target="_blank">AppBar</a>, are specific to <a href="https://material.io/" target="_blank">Material Design</a> apps. Other widgets, like <a href="https://docs.flutter.io/flutter/widgets/Text-class.html" target="_blank">Text</a>, are generic and can be used in any app. Widgets from different libraries in the Flutter framework are compatible and can work together in a single app.</li>
+</ul>
+<p>Click the hot reload button to see the changes almost instantly. After dividing the UI into separate classes and modifying the root widget, you should see no change:</p>
+<p>TODO: Screenshot</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add UI for Composing Messages" duration="0">
+        <p>In this section, you&#39;ll learn how to build a user control that enables the user to enter and send text messages.</p>
+<p>TODO: Screenshot</p>
+<p>On a device, clicking on the text field brings up a soft keyboard. Users can send chat messages by typing a non-empty string and pressing the Return key on the soft keyboard. Alternatively, users can send their typed messages by pressing the graphical <strong>Send</strong> button next to the input field.</p>
+<p>For now, the UI for composing messages is at the top of the chat screen but after we add the UI for displaying messages in the next step, it will move to the bottom of the chat screen.</p>
+<h2 is-upgraded>Add an Interactive Text Input Field</h2>
+<p>The Flutter framework provides a Material Design widget called <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a>. It&#39;s a stateful widget (a widget that has mutable state) with properties for customizing the behavior of the input field. State is information that can be read synchronously when the widget is built and that might change during the lifetime of the widget. Adding the first stateful widget to Friendlychat requires making a few modifications.</p>
+<p>In Flutter, if you want to visually present stateful data in a widget, you should encapsulate this data in a <a href="http://docs.flutter.io/flutter/widgets/State-class.html" target="_blank">State</a> object. You can then associate your <a href="http://docs.flutter.io/flutter/widgets/State-class.html" target="_blank">State</a> object with a widget that extends the <a href="http://docs.flutter.io/flutter/widgets/StatefulWidget-class.html" target="_blank">StatefulWidget</a> class.</p>
+<p>The following code snippet shows how you might start to define a class in your <code>main.dart</code> file to add the interactive text input field. First you&#39;ll change the <code>ChatScreen</code> class to subclass <a href="http://docs.flutter.io/flutter/widgets/StatefulWidget-class.html" target="_blank">StatefulWidget</a> instead of <a href="https://docs.flutter.io/flutter/widgets/StatelessWidget-class.html" target="_blank">StatelessWidget</a>. While <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a> handles the mutable text content, state belongs at this level of the widget hierarchy because <code>ChatScreen</code> will have a text controller object. You&#39;ll also define a new <code>ChatScreenState</code> class that implements the <a href="http://docs.flutter.io/flutter/widgets/State-class.html" target="_blank">State</a> object.</p>
+<p>Override the <a href="https://docs.flutter.io/flutter/widgets/StatefulWidget/createState.html" target="_blank">createState()</a> method as shown to attach the <code>ChatScreenState</code> class. You&#39;ll use the new class to build the stateful <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a> widget.</p>
+<p>Add a line above the <a href="https://docs.flutter.io/flutter/widgets/State/build.html" target="_blank">build()</a> method to define the <code>ChatScreenState</code> class:</p>
+<pre><code>// Modify the ChatScreen class definition to extend StatefulWidget.
+
+class ChatScreen extends StatefulWidget {                     //modified
+  @override                                                        //new
+  State createState() =&gt; new ChatScreenState();                    //new
+} 
+
+// Add the ChatScreenState class definition in main.dart.
+
+class ChatScreenState extends State&lt;ChatScreen&gt; {                  //new
+  @override                                                        //new
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(title: new Text(&#34;Friendlychat&#34;)),
+
+    );
+  }
+}
+</code></pre>
+<p>Now the <a href="https://docs.flutter.io/flutter/widgets/State/build.html" target="_blank">build()</a> method for <code>ChatScreenState</code> should include all the widgets formerly in the <code>ChatScreen</code> part of the widget tree. When the framework calls the <a href="https://docs.flutter.io/flutter/widgets/State/build.html" target="_blank">build()</a> method to refresh the UI, it can rebuild <code>ChatScreenState</code> with its tree of children widgets.</p>
+<aside class="special"><p><strong>Tip:</strong> It&#39;s often useful to view the source code definition of Flutter&#39;s framework APIs to get a better understanding of what&#39;s going on behind the scenes. You can do this easily from IntelliJ&#39;s editor panel by selecting a class or method name, then right-clicking and selecting the <strong>Go to Declaration</strong> option. Depending on the OS, you can also click while pressing the Command or Control button on the keyboard. <a href="https://flutter.io/intellij-ide/#tips-and-tricks" target="_blank">See more options and keyboard shortcuts</a>.</p>
+</aside>
+<p>Now that your app has the ability to manage state, you can build out the <code>ChatScreenState</code> class with an input field and send button.</p>
+<p>To manage interactions with the text field, it&#39;s helpful to use a <a href="https://docs.flutter.io/flutter/widgets/TextEditingController-class.html" target="_blank">TextEditingController</a> object. You&#39;ll use it for reading the contents of the input field, and for clearing the field after the text message is sent. Add a line to the <code>ChatScreenState</code> class definition to create this object.</p>
+<pre><code>// Add the following code in the ChatScreenState class definition.
+
+class ChatScreenState extends State&lt;ChatScreen&gt; {
+  final TextEditingController _textController = new TextEditingController(); //new
+</code></pre>
+<p>The following code snippet shows how you can define a private method called <code>_buildTextComposer()</code> that returns a <a href="https://docs.flutter.io/flutter/widgets/Container-class.html" target="_blank">Container</a> widget with a configured <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a> widget.</p>
+<pre><code>// Add the following code in the ChatScreenState class definition.
+
+Widget _buildTextComposer() {
+  return new Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+    child: new TextField(
+      controller: _textController,
+      onSubmitted: _handleSubmitted,
+      decoration: new InputDecoration.collapsed(
+        hintText: &#34;Send a message&#34;),
+    ),
+  );
+}
+</code></pre>
+<p>Start with a <a href="https://docs.flutter.io/flutter/widgets/Container-class.html" target="_blank">Container</a> widget that adds a horizontal margin between the edge of the screen and each side of the input field. The units here are logical pixels that get translated into a specific number of physical pixels, depending on a device&#39;s pixel ratio. You might be familiar with the equivalent term for iOS (<em>points</em>) or for Android (<em>density-independent pixels</em>).</p>
+<p>Add a <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a> widget and configure it as follows to manage user interactions:</p>
+<ul>
+<li>To have control over the contents of the text field, we&#39;ll provide the <code>TextField</code> constructor with a <code>TextEditingController</code>. This controller can also be used to clear the field or read its value.</li>
+<li>To be notified when the user submits a message, use the <a href="https://docs.flutter.io/flutter/material/TextField/onSubmitted.html" target="_blank">onSubmitted</a> argument to provide a private callback method <code>_handleSubmitted()</code>. For now, this method will just clear the field, and later on we&#39;ll add more to code to send the message. Define this method as follows:</li>
+</ul>
+<pre><code>// Add the following code in the ChatScreenState class definition.
+
+void _handleSubmitted(String text) {
+  _textController.clear();
+}
+</code></pre>
+<p><strong>Tip:</strong> Prefixing an identifier with an _ (underscore) makes it private to its class. The Dart compiler enforces privacy. See dartlang.org for more details on <a href="https://www.dartlang.org/guides/language/language-tour#libraries-and-visibility" target="_blank">libraries and visibility</a> in Dart.</p>
+<h2 is-upgraded>Place the Text Composer Widget</h2>
+<p>Now, tell the app how to display the text input user control. In the <a href="http://docs.flutter.io/flutter/material/State/build.html" target="_blank">build()</a> method of your <code>ChatScreenState</code> class, attach a private method called <code>_buildTextComposer</code> to the <a href="https://docs.flutter.io/flutter/material/Scaffold/body.html" target="_blank">body</a> property. The <code>_buildTextComposer</code> method returns a widget that encapsulates the text input field.</p>
+<pre><code>// Modify the code in the ChatScreenState class definition as follows.
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(title: new Text(&#34;Friendlychat&#34;)),
+
+      body: _buildTextComposer(), //new
+    );
+  }
+</code></pre>
+<p>Hot reload the app. You should see a single screen that looks like this.</p>
+<p>TODO: Screenshot</p>
+<h2 is-upgraded>Add a Responsive Send Button</h2>
+<p>Next, we&#39;ll add a ‘Send&#39; button to the right of the text field. Since we want to display the button adjacent to the input field, we&#39;ll use a <a href="https://docs.flutter.io/flutter/widgets/Row-class.html" target="_blank">Row</a> widget as the parent.</p>
+<p>Then wrap the <a href="http://docs.flutter.io/flutter/material/TextField-class.html" target="_blank">TextField</a> widget in a <a href="https://docs.flutter.io/flutter/widgets/Flexible-class.html" target="_blank">Flexible</a> widget. This tells the <a href="https://docs.flutter.io/flutter/widgets/Row-class.html" target="_blank">Row</a> to automatically size the text field to use the remaining space that isn&#39;t used by the button.</p>
+<pre><code>// Modify the _buildTextComposer method with the code below to arrange the 
+// text input field and send button.
+
+Widget _buildTextComposer() {
+  return new Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+    child: new Row(                                            //new
+      children: &lt;Widget&gt;[                                      //new
+        new Flexible(                                          //new
+          child: new TextField(
+            controller: _textController,
+            onSubmitted: _handleSubmitted,
+            decoration: new InputDecoration.collapsed(
+              hintText: &#34;Send a message&#34;),
+          ),
+        ),                                                      //new
+      ],                                                        //new
+    ),                                                          //new
+  );
+}
+</code></pre>
+<p>You can now create an <a href="http://docs.flutter.io/flutter/material/IconButton-class.html" target="_blank">IconButton</a> widget that displays the <strong>Send</strong> icon. In the <code>icon</code> property, use the <a href="https://docs.flutter.io/flutter/material/Icons/send-constant.html" target="_blank">Icons.send</a> constant to create a new <a href="https://docs.flutter.io/flutter/material/Icons-class.html" target="_blank">Icon</a> instance. This constant indicates that your widget uses the following ‘Send&#39; icon provided by the material icons library.</p>
+<aside class="special"><p><strong>Tip:</strong> For a list of the standard Material Design icons, refer to the <a href="https://material.io/icons/" target="_blank">Material Icons</a> site and the constants in the <a href="http://docs.flutter.io/flutter/material/Icons-class.html" target="_blank">Icons</a> class.</p>
+</aside>
+<p>Put your <a href="http://docs.flutter.io/flutter/material/IconButton-class.html" target="_blank">IconButton</a> widget inside another <a href="https://docs.flutter.io/flutter/widgets/Container-class.html" target="_blank">Container</a> parent widget; this lets you customize the margin spacing of the button so that it visually fits better next to your input field. For the <a href="https://docs.flutter.io/flutter/material/IconButton/onPressed.html" target="_blank">onPressed</a> property, use an anonymous function to also invoke the <code>_handleSubmitted()</code> method and use <code>_textController</code> to pass it the contents of the message.</p>
+<pre><code>// Modify the _buildTextComposer method with the code below to define the 
+// send button.
+
+Widget _buildTextComposer() {
+  return new Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+    child: new Row(
+      children: &lt;Widget&gt;[
+        new Flexible(
+          child: new TextField(
+            controller: _textController,
+            onSubmitted: _handleSubmitted,
+            decoration: new InputDecoration.collapsed(
+              hintText: &#34;Send a message&#34;),
+          ),
+        ),
+        new Container(                                                 //new
+          margin: new EdgeInsets.symmetric(horizontal: 4.0),           //new
+          child: new IconButton(                                       //new
+            icon: new Icon(Icons.send),                                //new
+            onPressed: () =&gt; _handleSubmitted(_textController.text)),  //new
+        ),                                                             //new
+      ],
+    ),
+  );
+}
+</code></pre>
+<aside class="special"><p><strong>Tip:</strong> In Dart syntax, the fat arrow function declaration <code>=&gt; expression</code> is shorthand for <code>{ return expression; }</code>.</p>
+</aside>
+<p>For an overview of Dart function support, including anonymous and nested functions, see the <a href="https://www.dartlang.org/guides/language/language-tour" target="_blank">Dart Language Tour</a>.</p>
+<p>The color of the button is black, from the default Material Design theme. To give the icons in your app an accent color, pass the color argument to IconButton. Alternatively, you can apply a different theme.</p>
+<p>Icons inherit their color, opacity, and size from an <a href="https://docs.flutter.io/flutter/material/IconTheme-class.html" target="_blank">IconTheme</a> widget, which uses an <a href="https://docs.flutter.io/flutter/material/IconThemeData-class.html" target="_blank">IconThemeData</a> object to define these characteristics. Wrap all the widgets in the <code>_buildTextComposer()</code> method in an <a href="https://docs.flutter.io/flutter/material/IconTheme-class.html" target="_blank">IconTheme</a> widget, and use its <a href="https://docs.flutter.io/flutter/material/IconTheme/data.html" target="_blank">data</a> property to specify the <a href="https://docs.flutter.io/flutter/material/ThemeData-class.html" target="_blank">ThemeData</a> object of the current theme. This gives the button (and any other icons in this part of the widget tree) the accent color of the current theme.</p>
+<pre><code>// Modify the _buildTextComposer method with the code below to give the 
+// send button the current theme&#39;s accent color.
+
+Widget _buildTextComposer() {
+  return new IconTheme(                                            //new
+    data: new IconThemeData(color: Theme.of(context).accentColor), //new
+    child: new Container(                                     //modified
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: new Row(
+        children: &lt;Widget&gt;[
+          new Flexible(
+            child: new TextField(
+              controller: _textController,
+              onSubmitted: _handleSubmitted,
+              decoration: new InputDecoration.collapsed(
+                hintText: &#34;Send a message&#34;),
+            ),
+          ),
+          new Container(
+            margin: new EdgeInsets.symmetric(horizontal: 4.0),
+            child: new IconButton(
+              icon: new Icon(Icons.send),
+              onPressed: () =&gt; _handleSubmitted(_textController.text)),
+          ),
+        ],
+      ),
+    ),                                                             //new
+  );
+}
+</code></pre>
+<p>A <a href="https://docs.flutter.io/flutter/widgets/BuildContext-class.html" target="_blank">BuildContext</a> object is a handle to the location of a widget in your app&#39;s widget tree. Each widget has its own <a href="https://docs.flutter.io/flutter/widgets/BuildContext-class.html" target="_blank">BuildContext</a>, which becomes the parent of the widget returned by the <a href="https://docs.flutter.io/flutter/widgets/StatelessWidget/build.html" target="_blank">StatelessWidget.build</a> or <a href="https://docs.flutter.io/flutter/widgets/State/build.html" target="_blank">State.build</a> function. This means the <code>_buildTextComposer()</code> method can access the <a href="https://docs.flutter.io/flutter/widgets/BuildContext-class.html" target="_blank">BuildContext</a> object from its encapsulating <a href="https://docs.flutter.io/flutter/widgets/State-class.html" target="_blank">State</a> object; you don&#39;t need to pass the context to the method explicitly.</p>
+<p>Hot reload the app. You should see a screen that looks like this.</p>
+<p>TODO: Screenshot</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add UI for Displaying Messages" duration="0">
+        <p>Dhsujd</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Apply Finnishing Touches" duration="0">
+        <p>egwbdaj</p>
 
 
       </google-codelab-step>
