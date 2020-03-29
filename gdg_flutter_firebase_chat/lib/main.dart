@@ -12,7 +12,7 @@ void main() {
         backgroundColor:
             AppConstants.hexToColor(AppConstants.APP_BACKGROUND_COLOR),
         primaryColorLight:
-            AppConstants.hexToColor(AppConstants.APP_Primary_ColorLight),
+            AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_LIGHT),
         accentColor: Colors.black,
         accentIconTheme: IconThemeData(color: Colors.black),
         dividerColor: Colors.black12,

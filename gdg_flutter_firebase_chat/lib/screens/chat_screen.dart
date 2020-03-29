@@ -33,7 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
           color: isMe
               ? AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_ACTION)
               : AppConstants.hexToColor(
-                  AppConstants.APP_BACKGROUND_COLOR_White),
+                  AppConstants.APP_BACKGROUND_COLOR_WHITE),
           borderRadius: isMe
               ? BorderRadius.only(
                   topLeft: Radius.circular(15.0),
