@@ -21,8 +21,7 @@ We will show how to setup up the app with Firebase and how to create a Firebase 
 Have a Google account that you will use for login to Firebase.
 See the official prerequisites on the [Firebase documentation](https://firebase.google.com/docs/flutter/setup#prerequisites) 
 
-To follow along you can download the project from GitHub.
-TODO: Have url for download on GH 
+You can [download the project from GitHub](https://github.com/martinloesethjensen/flutter-firebase).
 
 Be able to run Flutter on either a simulator or physical device.
 You can follow the steps in the Flutter website: [Getting Started](https://flutter.dev/docs/get-started)
