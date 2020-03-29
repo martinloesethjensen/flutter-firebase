@@ -52,6 +52,54 @@ Positive
 : **Note:** you need to have a device or emulator connected / started for the app to run.
 You can find [useful Flutter commands here](https://gist.github.com/martinloesethjensen/8b53ec97834aaea2622d57ec94d3fb5e).
 
+## Start Building
+
+Now that we can run our Flutter code on an emulator or device, we will try to build something for ourself.
+We will now remove all the code in the `main.dart` file and fill in with this code below.
+
+```dart
+import 'package:flutter/material.dart';
+ 
+void main() {
+  runApp(
+    MaterialApp(
+      title: "GDG Firebase chat",
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("GDG Firebase chat"),
+        ),
+      ),
+    ),
+  );
+}
+```
+
+Let us delete the `test` folder as we will not be needing that in this codelab.
+You can do it via the terminal, folder or IDE.
+
+In the terminal you can use this command:
+
+```bash
+rm -r test/
+```
+
+Now we will create a new folder in the `lib` folder. Let us name the folder `helpers`, and the purpose of this folder is to have files with code that will be used througout the project. Such an example could be constants like colours.
+
+You can do it via the terminal, folder or IDE.
+
+In the terminal you can use this command:
+
+```bash
+cd lib
+mkdir helpers
+```
+
+While we are at it we will make a new dart file in that folder, `app_constants.dart`.
+
+Your structure should look like this.
+
+![folder_structure_01](/Users/mlj/Dropbox/projects/flutter-firebase/img/folder_structure_01.png)
+
 ## Build the User Interface
 
 TODO:
