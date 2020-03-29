@@ -160,7 +160,91 @@ void main() {
 }
 ```
 
+Let us now add assets to our project. We will first create a folder called `assets` and then create a sub folder within the `assets` folder, named `images`.
 
+The end result should look like this:
+
+![folder_structure_02](/Users/mlj/Dropbox/projects/flutter-firebase/img/folder_structure_02.png)
+
+You can [download the user_placeholder.jpg here](https://github.com/martinloesethjensen/flutter-firebase/blob/master/gdg_flutter_firebase_chat/assets/images/user_placeholder.jpg) and then put it in your `images` folder.
+
+In the `pubspec.yaml` we need to specify where the assets are located. 
+
+```yaml
+flutter:
+	...
+  assets:
+   - assets/images/
+```
+
+
+
+### Add an App Drawer to Your App
+
+Now we will add an app drawer to the app. 
+
+We will create a method `_appDrawer()` that will return an `AppDrawer` [Widget](https://api.flutter.dev/flutter/widgets/Widget-class.html).
+
+```dart
+_appDrawer() {
+  return Drawer(
+    child: Column(
+      children: <Widget>[
+        DrawerHeader(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              CircleAvatar(
+                radius: 30.0,
+                backgroundImage:
+                    AssetImage('assets/images/user_placeholder.jpg'), 
+                backgroundColor: Colors.transparent,
+              ),
+              Text(
+                'Sumith Damodaran',
+                style: TextStyle(color: Colors.black),
+              ),
+              Text(
+                'PM @ Sitecore',
+                style: TextStyle(color: Colors.black),
+              )
+            ],
+          ),
+        ),
+        Spacer(),
+        ListTile(
+          leading: Icon(Icons.home),
+          title: Text('Home'),
+          onTap: () {},  // Handle tap of the app drawer item 
+        ),
+        Divider(),
+        ListTile(
+          leading: Icon(Icons.people),
+          title: Text('Attendants'),
+          onTap: () {},  // Handle tap of the app drawer item 
+        ),
+        Spacer(flex: 8),
+      ],
+    ),
+  );
+}
+
+```
+
+We will add the `_appDrawer()` to the `drawer` field in our `Scaffold`(...):
+
+```dart
+home: Scaffold(
+        drawer: _appDrawer(),
+        appBar: AppBar(
+          title: Text("GDG Firebase chat"),
+        ),
+      ),
+```
+
+Run the app and see that the changes should look like this:
+
+![app_drawer](/Users/mlj/Dropbox/projects/flutter-firebase/img/app_drawer.png)
 
 ## Build the User Interface
 

@@ -112,7 +112,7 @@ class AppConstants {
 
 </code></pre>
 <p>Now we will update the theme of the app with the colors we want. We have our colors in the <code>AppConstants</code>class.<br>We update the <code>theme</code> field in the <code>MaterialApp(...)</code> in our <code>main.dart</code> file.</p>
-<p>Remember to import app_constants: <code>import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;</code></p>
+<p>Remember to import app_constants in the import section in the top of the file.</p>
 <pre><code>import &#39;package:flutter/material.dart&#39;;
 import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;  
  
@@ -142,6 +142,73 @@ void main() {
   );
 }
 </code></pre>
+<p>Let us now add assets to our project. We will first create a folder called <code>assets</code> and then create a sub folder within the <code>assets</code> folder, named <code>images</code>.</p>
+<p>The end result should look like this:</p>
+<p class="image-container"><img alt="folder_structure_02" src="img/967545df2c11749d.png"></p>
+<p>You can <a href="https://github.com/martinloesethjensen/flutter-firebase/blob/master/gdg_flutter_firebase_chat/assets/images/user_placeholder.jpg" target="_blank">download the user_placeholder.jpg here</a> and then put it in your <code>images</code> folder.</p>
+<p>In the <code>pubspec.yaml</code> we need to specify where the assets are located.</p>
+<pre><code>flutter:
+	...
+  assets:
+   - assets/images/
+</code></pre>
+<h2 is-upgraded>Add an App Drawer to Your App</h2>
+<p>Now we will add an app drawer to the app.</p>
+<p>We will create a method <code>_appDrawer()</code> that will return an <code>AppDrawer</code><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html" target="_blank">Widget</a>.</p>
+<pre><code>_appDrawer() {
+  return Drawer(
+    child: Column(
+      children: &lt;Widget&gt;[
+        DrawerHeader(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: &lt;Widget&gt;[
+              CircleAvatar(
+                radius: 30.0,
+                backgroundImage:
+                    AssetImage(&#39;assets/images/user_placeholder.jpg&#39;), 
+                backgroundColor: Colors.transparent,
+              ),
+              Text(
+                &#39;Sumith Damodaran&#39;,
+                style: TextStyle(color: Colors.black),
+              ),
+              Text(
+                &#39;PM @ Sitecore&#39;,
+                style: TextStyle(color: Colors.black),
+              )
+            ],
+          ),
+        ),
+        Spacer(),
+        ListTile(
+          leading: Icon(Icons.home),
+          title: Text(&#39;Home&#39;),
+          onTap: () {},  // Handle tap of the app drawer item 
+        ),
+        Divider(),
+        ListTile(
+          leading: Icon(Icons.people),
+          title: Text(&#39;Attendants&#39;),
+          onTap: () {},  // Handle tap of the app drawer item 
+        ),
+        Spacer(flex: 8),
+      ],
+    ),
+  );
+}
+
+</code></pre>
+<p>We will add the <code>_appDrawer()</code> to the <code>drawer</code> field in our <code>Scaffold</code>(...):</p>
+<pre><code>home: Scaffold(
+        drawer: _appDrawer(),
+        appBar: AppBar(
+          title: Text(&#34;GDG Firebase chat&#34;),
+        ),
+      ),
+</code></pre>
+<p>Run the app and see that the changes should look like this:</p>
+<p class="image-container"><img alt="app_drawer" src="img/6e0765d45eeec667.png"></p>
 
 
       </google-codelab-step>
