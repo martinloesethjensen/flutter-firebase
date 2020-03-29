@@ -568,7 +568,7 @@ Our `build()` method should now also iterate over the list of messages.
   }
 ```
 
-## Handle Composing messages
+### Handle Composing messages 
 
 We will create a method to handle when a message has been submitted. This method will be called: `_handleSubmitted` and it will take in a `String` as a parameter so it can create a new message and add it to our list `_messages`.
 
@@ -592,11 +592,9 @@ void _handleSubmitted(String text) {
   }
 ```
 
+Run the app and see that you can add new messages to the chat.
 
-
-## Apply Finnishing Touches
-
-TODO:
+![chat_screen](/Users/mlj/Dropbox/projects/flutter-firebase/img/chat_screen.png)
 
 ## Create a Firebase Project
 
