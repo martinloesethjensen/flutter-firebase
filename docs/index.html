@@ -241,7 +241,8 @@ class _ChatScreenState extends State&lt;ChatScreen&gt; {
 <p>Design:</p>
 <p class="image-container"><img alt="chat_screen_design" src="img/260c3a870a633934.png"></p>
 <p>We know it will have a keyboard so we will initialize <code>TextEditingController</code> as a field in the class <code>_ChatScreenState</code>.</p>
-<pre><code>final TextEditingController _textMessageController = TextEditingController();
+<pre><code>bool _isComposing = false;  // Being used later to determine when TextEditingController is used to compose a message.
+final TextEditingController _textMessageController = TextEditingController();
 </code></pre>
 <p>Then we will create a method <code>_buildMessageComposer()</code> where our input UI will be build.</p>
 <pre><code>_buildMessageComposer() {
@@ -298,6 +299,223 @@ class _ChatScreenState extends State&lt;ChatScreen&gt; {
 <p>Now run the app.</p>
 <p>The screen should now look like this:</p>
 <p class="image-container"><img alt="chat_screen_01" src="img/37f1435f081bcb9d.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Build Message UI" duration="0">
+        <p>Before we start creating the UI for the messages, we should create some model classes, <code>user</code> and <code>message</code>.</p>
+<p>Let&#39;s create a new folder in the <code>lib</code> folder, <code>models</code>. This will have all the model files we need.<br>Now create two files in the <code>models</code> folder: <code>user.dart</code> and <code>message.dart</code>.</p>
+<p><code>user.dart</code>:</p>
+<pre><code>class User {
+  final int id;
+  final String name, profileImageUrl, email, bio;
+
+  User({
+    this.id,
+    this.name,
+    this.profileImageUrl,
+    this.email,
+    this.bio,
+  });
+}
+
+</code></pre>
+<p><code>message.dart</code></p>
+<pre><code>import &#39;package:gdg_flutter_firebase_chat/models/user.dart&#39;;
+
+class Message {
+  final User sender;
+  final String
+      time; // Would usually be type DateTime or Firebase Timestamp in production apps
+  final String text;
+  final bool isLiked;
+  final bool unread;
+
+  Message({
+    this.sender,
+    this.time,
+    this.text,
+    this.isLiked,
+    this.unread,
+  });
+}
+
+// EXAMPLE MESSAGES IN CHAT SCREEN
+List&lt;Message&gt; messages = [
+  Message(
+    sender: martin,
+    time: &#39;5:30 PM&#39;,
+    text: &#39;Hey, how\&#39;s it going? What did you do today?&#39;,
+    isLiked: true,
+    unread: true,
+  ),
+  Message(
+    sender: currentUser,
+    time: &#39;4:30 PM&#39;,
+    text: &#39;Just walked my doge. She was super duper cute. The best pupper!!&#39;,
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: &#39;3:45 PM&#39;,
+    text: &#39;How\&#39;s the doggo?&#39;,
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: &#39;3:15 PM&#39;,
+    text: &#39;All the food&#39;,
+    isLiked: true,
+    unread: true,
+  ),
+  Message(
+    sender: currentUser,
+    time: &#39;2:30 PM&#39;,
+    text: &#39;Nice! What kind of food did you eat?&#39;,
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: &#39;2:00 PM&#39;,
+    text: &#39;I ate so much food today.&#39;,
+    isLiked: false,
+    unread: true,
+  ),
+];
+
+</code></pre>
+<h2 is-upgraded>Messages UI in Chat Screen</h2>
+<p>In our <code>chat_screen.dart</code> we create a new method <code>_buildMessage()</code> for our messages.</p>
+<pre><code>_buildMessage(Message message, bool isMe) {
+    final Widget msg = Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Container(
+        margin: isMe
+            ? EdgeInsets.only(
+                top: 8.0,
+                bottom: 8.0,
+                left: 80.0,
+              )
+            : EdgeInsets.only(
+                top: 8.0,
+                bottom: 8.0,
+              ),
+        padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+        width: MediaQuery.of(context).size.width * 0.75,
+        decoration: BoxDecoration(
+          color: isMe
+              ? AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_ACTION)
+              : AppConstants.hexToColor(
+                  AppConstants.APP_BACKGROUND_COLOR_WHITE),
+          borderRadius: isMe
+              ? BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomLeft: Radius.circular(15.0),
+                )
+              : BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomRight: Radius.circular(15.0),
+                ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: &lt;Widget&gt;[
+            Text(
+              message.text,
+              style: TextStyle(
+                color: isMe ? Colors.white60 : Colors.blueGrey,
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Row(
+              mainAxisAlignment:
+                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: &lt;Widget&gt;[
+                Text(
+                  message.time,
+                  style: TextStyle(
+                    color: isMe ? Colors.white60 : Colors.grey,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+</code></pre>
+<p>Remember to import the necessary import.</p>
+<pre><code>import &#39;package:gdg_flutter_firebase_chat/helpers/app_constants.dart&#39;;
+import &#39;package:gdg_flutter_firebase_chat/models/message.dart&#39;;
+</code></pre>
+<p>Let&#39;s create a list of messages as a field in the class <code>_ChatScreenState</code>.</p>
+<pre><code>final List&lt;Message&gt; _messages = messages; // messages is the dummy data list in message.dart
+</code></pre>
+<p>Our <code>build()</code> method should now also iterate over the list of messages.</p>
+<pre><code>@override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(&#34;Chats&#34;)),
+      body: GestureDetector(
+        onTap: () =&gt; FocusScope.of(context).unfocus(),
+        child: Column(
+          children: &lt;Widget&gt;[
+            Expanded(
+              child: Container(
+                child: ListView.builder(
+                  reverse: true,
+                  padding: EdgeInsets.only(top: 15.0),
+                  itemCount: _messages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final Message message = _messages[index];
+                    final bool isMe = message.sender.id == currentUser.id;
+
+                    return _buildMessage(message, isMe);
+                  },
+                ),
+              ),
+            ),
+            _buildMessageComposer(),
+          ],
+        ),
+      ),
+    );
+  }
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Handle Composing messages" duration="0">
+        <p>We will create a method to handle when a message has been submitted. This method will be called: <code>_handleSubmitted</code> and it will take in a <code>String</code> as a parameter so it can create a new message and add it to our list <code>_messages</code>.</p>
+<pre><code>void _handleSubmitted(String text) {
+    _textMessageController.clear();
+
+    setState(() {
+      _isComposing = false;
+    });
+    Message message = Message(
+      sender: currentUser,
+      time: &#39;6:30 PM&#39;,
+      text: text,
+      isLiked: true,
+      unread: true,
+    );
+    setState(() {
+      _messages.insert(0, message);
+    });
+  }
+</code></pre>
 
 
       </google-codelab-step>

@@ -288,6 +288,7 @@ Design:
 We know it will have a keyboard so we will initialize `TextEditingController` as a field in the class `_ChatScreenState`.
 
 ```dart
+bool _isComposing = false;  // Being used later to determine when TextEditingController is used to compose a message.
 final TextEditingController _textMessageController = TextEditingController();
 ```
 
@@ -354,6 +355,244 @@ Now run the app.
 The screen should now look like this:
 
 ![chat_screen_01](/Users/mlj/Dropbox/projects/flutter-firebase/img/chat_screen_01.png)
+
+## Build Message UI
+
+Before we start creating the UI for the messages, we should create some model classes, `user` and `message`.
+
+Let's create a new folder in the `lib` folder, `models`. This will have all the model files we need. 
+Now create two files in the `models` folder: `user.dart` and `message.dart`.
+
+`user.dart`:
+
+```dart
+class User {
+  final int id;
+  final String name, profileImageUrl, email, bio;
+
+  User({
+    this.id,
+    this.name,
+    this.profileImageUrl,
+    this.email,
+    this.bio,
+  });
+}
+
+```
+
+`message.dart`
+
+```dart
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+
+class Message {
+  final User sender;
+  final String
+      time; // Would usually be type DateTime or Firebase Timestamp in production apps
+  final String text;
+  final bool isLiked;
+  final bool unread;
+
+  Message({
+    this.sender,
+    this.time,
+    this.text,
+    this.isLiked,
+    this.unread,
+  });
+}
+
+// EXAMPLE MESSAGES IN CHAT SCREEN
+List<Message> messages = [
+  Message(
+    sender: martin,
+    time: '5:30 PM',
+    text: 'Hey, how\'s it going? What did you do today?',
+    isLiked: true,
+    unread: true,
+  ),
+  Message(
+    sender: currentUser,
+    time: '4:30 PM',
+    text: 'Just walked my doge. She was super duper cute. The best pupper!!',
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: '3:45 PM',
+    text: 'How\'s the doggo?',
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: '3:15 PM',
+    text: 'All the food',
+    isLiked: true,
+    unread: true,
+  ),
+  Message(
+    sender: currentUser,
+    time: '2:30 PM',
+    text: 'Nice! What kind of food did you eat?',
+    isLiked: false,
+    unread: true,
+  ),
+  Message(
+    sender: martin,
+    time: '2:00 PM',
+    text: 'I ate so much food today.',
+    isLiked: false,
+    unread: true,
+  ),
+];
+
+```
+
+### Messages UI in Chat Screen
+
+In our `chat_screen.dart` we create a new method `_buildMessage()` for our messages.
+
+```dart
+_buildMessage(Message message, bool isMe) {
+    final Widget msg = Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Container(
+        margin: isMe
+            ? EdgeInsets.only(
+                top: 8.0,
+                bottom: 8.0,
+                left: 80.0,
+              )
+            : EdgeInsets.only(
+                top: 8.0,
+                bottom: 8.0,
+              ),
+        padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+        width: MediaQuery.of(context).size.width * 0.75,
+        decoration: BoxDecoration(
+          color: isMe
+              ? AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_ACTION)
+              : AppConstants.hexToColor(
+                  AppConstants.APP_BACKGROUND_COLOR_WHITE),
+          borderRadius: isMe
+              ? BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomLeft: Radius.circular(15.0),
+                )
+              : BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                  bottomRight: Radius.circular(15.0),
+                ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              message.text,
+              style: TextStyle(
+                color: isMe ? Colors.white60 : Colors.blueGrey,
+                fontSize: 12.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Row(
+              mainAxisAlignment:
+                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  message.time,
+                  style: TextStyle(
+                    color: isMe ? Colors.white60 : Colors.grey,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+```
+
+Remember to import the necessary import.
+
+```dart
+import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';
+import 'package:gdg_flutter_firebase_chat/models/message.dart';
+```
+
+Let's create a list of messages as a field in the class `_ChatScreenState`.
+
+```dart
+final List<Message> _messages = messages; // messages is the dummy data list in message.dart
+```
+
+Our `build()` method should now also iterate over the list of messages.
+
+```dart
+@override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Chats")),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                child: ListView.builder(
+                  reverse: true,
+                  padding: EdgeInsets.only(top: 15.0),
+                  itemCount: _messages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final Message message = _messages[index];
+                    final bool isMe = message.sender.id == currentUser.id;
+
+                    return _buildMessage(message, isMe);
+                  },
+                ),
+              ),
+            ),
+            _buildMessageComposer(),
+          ],
+        ),
+      ),
+    );
+  }
+```
+
+## Handle Composing messages
+
+We will create a method to handle when a message has been submitted. This method will be called: `_handleSubmitted` and it will take in a `String` as a parameter so it can create a new message and add it to our list `_messages`.
+
+```dart
+void _handleSubmitted(String text) {
+    _textMessageController.clear();
+
+    setState(() {
+      _isComposing = false;
+    });
+    Message message = Message(
+      sender: currentUser,
+      time: '6:30 PM',
+      text: text,
+      isLiked: true,
+      unread: true,
+    );
+    setState(() {
+      _messages.insert(0, message);
+    });
+  }
+```
+
+
 
 ## Apply Finnishing Touches
 
