@@ -155,29 +155,35 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Chats")),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: ListView.builder(
-                  reverse: true,
-                  padding: EdgeInsets.only(top: 15.0),
-                  itemCount: _messages.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final Message message = _messages[index];
-                    final bool isMe = message.sender.id == currentUser.id;
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(title: Text("Chats")),
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.only(top: 15.0),
+                      itemCount: _messages.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final Message message = _messages[index];
+                        final bool isMe = message.sender.id == currentUser.id;
 
-                    return _buildMessage(message, isMe);
-                  },
+                        return _buildMessage(message, isMe);
+                      },
+                    ),
+                  ),
                 ),
-              ),
+                _buildMessageComposer(),
+              ],
             ),
-            _buildMessageComposer(),
-          ],
+          ),
         ),
       ),
     );
