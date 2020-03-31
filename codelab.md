@@ -520,6 +520,11 @@ _buildMessage(Message message, bool isMe) {
         ),
       ),
     );
+
+    return Row(
+      children: <Widget>[msg],
+    );
+  }
 ```
 
 Remember to import the necessary packages, files and classes.
