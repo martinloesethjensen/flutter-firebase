@@ -484,29 +484,35 @@ import &#39;package:gdg_flutter_firebase_chat/models/message.dart&#39;;
 <p>Run and see how it looks.<br>To make the list fit the screen with the text field where we compose messages, then we need to &#34;expand&#34; the view of the list.</p>
 <pre><code>@override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(&#34;Chats&#34;)),
-      body: GestureDetector(
-        onTap: () =&gt; FocusScope.of(context).unfocus(),  // Will hide the keyboard when the user touches the messages list view.
-        child: Column(
-          children: &lt;Widget&gt;[
-            Expanded(  // Expand widget to fill the available space
-              child: Container(
-                child: ListView.builder(
-                  reverse: true,
-                  padding: EdgeInsets.only(top: 15.0),
-                  itemCount: _messages.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final Message message = _messages[index];
-                    final bool isMe = message.sender.id == currentUser.id;
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
+          appBar: AppBar(title: Text(&#34;Chats&#34;)),
+          body: GestureDetector(
+            onTap: () =&gt; FocusScope.of(context).unfocus(),  // Will hide the keyboard when the user touches the messages list view.
+            child: Column(
+              children: &lt;Widget&gt;[
+                Expanded(  // Expand widget to fill the available space
+                  child: Container(
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.only(top: 15.0),
+                      itemCount: _messages.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final Message message = _messages[index];
+                        final bool isMe = message.sender.id == currentUser.id;
 
-                    return _buildMessage(message, isMe);
-                  },
+                        return _buildMessage(message, isMe);
+                      },
+                    ),
+                  ),
                 ),
-              ),
+                _buildMessageComposer(),
+              ],
             ),
-            _buildMessageComposer(),
-          ],
+          ),
         ),
       ),
     );
