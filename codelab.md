@@ -5,6 +5,7 @@ tags: Flutter, Firebase
 status: Draft
 authors: Martin Løseth Jensen
 Feedback Link: https://github.com/martinloesethjensen/flutter-firebase/issues/new
+Analytics Account: 228626780
 
 # Flutter Firebase Codelab
 
