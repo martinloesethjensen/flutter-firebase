@@ -2,7 +2,7 @@
 
 claat export codelab.md
 
-CODELAB_FOLDER="flutter-firebase-workshop"
+CODELAB_FOLDER="flutter-firebase-codelab"
 
 mv $CODELAB_FOLDER docs
 

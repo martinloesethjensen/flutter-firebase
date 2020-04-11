@@ -3,8 +3,8 @@
   "format": "html",
   "prefix": "https://storage.googleapis.com",
   "mainga": "UA-49880327-14",
-  "updated": "2020-04-11T22:16:25+02:00",
-  "id": "flutter-firebase-codelab",
+  "updated": "2020-04-11T21:53:01+02:00",
+  "id": "flutter-firebase-workshop",
   "duration": 0,
   "title": "Flutter Firebase Codelab",
   "authors": "Martin Løseth Jensen",
@@ -20,11 +20,10 @@
     "firebase"
   ],
   "tags": [
-    "dart",
     "firebase",
     "flutter"
   ],
   "feedback": "https://github.com/martinloesethjensen/flutter-firebase/issues/new",
   "ga": "228626780",
-  "url": "flutter-firebase-codelab"
+  "url": "flutter-firebase-workshop"
 }

@@ -1,7 +1,7 @@
 summary: Add Firebase to Your Flutter App
-id: flutter-firebase-workshop
+id: flutter-firebase-codelab
 categories: flutter, dart, firebase
-tags: Flutter, Firebase
+tags: Flutter, Firebase, Dart
 status: Draft
 authors: Martin Løseth Jensen
 Feedback Link: https://github.com/martinloesethjensen/flutter-firebase/issues/new
@@ -16,6 +16,8 @@ In this codelab we want to show how to implement Firebase into a Flutter app.
 We will build a chat app where users can log in / sign in with Firebase, interact with Firestore, upload images to Firebase Storage, push notifications and analytics. 
 
 We will show how to setup up the app with Firebase and how to create a Firebase project.
+
+You can jump down to the Firebase section by following [this link](https://martinjensen.tech/flutter-firebase/#0).
 
 ## Prerequisite
 
@@ -664,3 +666,688 @@ You can find a detailed description on how to [add Firebase to your Flutter app 
 ### iOS Configuration
 
 You can find a detailed description on how to [add Firebase to your Flutter app with iOS configuration](https://firebase.google.com/docs/flutter/setup?platform=ios). 
+
+## Firebase Starting Point
+
+Follow along by cloning or downloading [this repo](https://github.com/sumithpdd/gdg_flutter_firebase_chat/tree/FirebaseInitial).
+
+You can use `git` by getting the right branch `FirebaseInitial`
+
+```bash
+git clone https://github.com/sumithpdd/gdg_flutter_firebase_chat.git -b FirebaseInitial
+```
+
+Navigate to the newly cloned folder.
+
+```bash
+cd gdg_flutter_firebase_chat
+```
+
+Then run the `flutter pub get` command to get all dependencies set up for the project.
+
+ ```bash 
+flutter pub get
+ ```
+
+## Task: Authentication & Login
+
+In the `lib` folder create another folder `services`. In here we will create a dart file called `auth_service.dart`.
+
+We will make a service class that handle auth, which in this case is login, logout, and signup. 
+
+```dart
+class AuthService {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+   Stream<FirebaseUser> get user => _firebaseAuth.onAuthStateChanged;
+ 
+  Future<void> signup(String name, String email, String password) async {
+    try {
+      AuthResult authResult = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+ 
+    } on PlatformException catch (error) {
+      throw (error);
+    }
+  }
+ 
+  Future<void> login(String email, String password) async {
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
+          email: email, password: password);
+    } on PlatformException catch (error) {
+      throw (error);
+    }
+  }
+ 
+  Future<void> logout() {
+    Future.wait([_firebaseAuth.signOut()]);
+  }
+}
+
+```
+
+We would need to get a hold of the Firebase instance, so for now let us put some of our collections, storage referrences and instances in the `constants.dart` file in the `helpers` folder
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+final Firestore _db = Firestore.instance;
+final usersRef = _db.collection('users');
+final chatsRef = _db.collection('chats');
+ 
+final FirebaseStorage _storage = FirebaseStorage.instance;
+final storageRef =_storage.ref();
+```
+
+Then we need to update the `signup` method so the file should look like this.
+
+```dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/constants.dart'; 
+
+class AuthService {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  Stream<FirebaseUser> get user => _firebaseAuth.onAuthStateChanged;
+
+  Future<void> signup(String name, String email, String password) async {
+    try {
+      AuthResult authResult = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+
+      if (authResult.user != null) {
+        String token = await _firebaseMessaging.getToken();
+        usersRef.document(authResult.user.uid).setData({
+          'name': name,
+          'email': email, 
+          'profileImageUrl': '',
+          'bio': '',
+          'token': token,
+        });
+        print('Signup complete');
+      }
+    } on PlatformException catch (error) {
+      throw (error);
+    }
+  }
+
+  Future<void> login(String email, String password) async {
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(
+          email: email, password: password);
+          print('login complete');
+    } on PlatformException catch (error) {
+      throw (error);
+    }
+  }
+
+  Future<void> logout() {
+    Future.wait([_firebaseAuth.signOut()]);
+  }
+}
+```
+
+## Task: Modify User
+
+Now let us modify the `User` class.
+
+```dart
+class User {
+  final String id;
+  final String name;
+  final String profileImageUrl, email, bio, token;
+  
+  // {} named parameters
+  User(
+     {this.id,
+      this.name,
+      this.profileImageUrl,
+      this.email,
+      this.bio,
+      this.token});
+ 
+  factory User.fromDoc(DocumentSnapshot doc) {
+    return User(
+        id: doc.documentID,
+        name: doc['name'],
+        profileImageUrl: doc['profileImageUrl'],
+        email: doc['email'],
+        bio: doc['bio'],
+        token: doc['token']);
+  }
+}
+
+```
+
+### Check Firebase Security Rules
+
+For our app we won't have it in production so we would either put the firestore rule set in "Test Mode" meaning read and write access for anybody in 30 days. Or just have it all enabled for all users. 
+
+```javascript
+// Allow read/write access to all users under any conditions
+// Warning: **NEVER** use this rule set in production; it allows
+// anyone to overwrite your entire database.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+Negative
+: Allow read/write access to all users under any conditions. 
+Warning: **NEVER** use this rule set in production; it allows anyone to overwrite your entire database.
+
+Positive
+: You can read more on Firebase security rules [here](https://firebase.google.com/docs/firestore/security/get-started).
+
+### Update Messages
+
+As we have changed the `User` constructor parameters we need to fix this:
+
+```dart
+// YOU - current user
+final User currentUser = User(
+ id: '0',
+ name: 'Current User',
+ profileImageUrl: 'assets/images/greg.jpg',
+);
+final User sumith = User(
+ id: '1',
+ name: 'sumith',
+ profileImageUrl: 'assets/images/greg.jpg',
+);
+final User martin = User(
+ id: '2',
+ name: 'martin',
+ profileImageUrl: 'assets/images/james.jpg',
+);
+final User laura = User(
+ id: '3',
+ name: 'laura',
+ profileImageUrl: 'assets/images/john.jpg',
+);
+final User bilal = User(
+ id: '4',
+ name: 'bilal',
+ profileImageUrl: 'assets/images/olivia.jpg',
+);
+final User sam = User(
+ id: '5',
+ name: 'Sam',
+ profileImageUrl: 'assets/images/sam.jpg',
+);
+final User sophia = User(
+ id: '6',
+ name: 'Sophia',
+ profileImageUrl: 'assets/images/sophia.jpg',
+);
+final User steven = User(
+ id: '7',
+ name: 'Steven',
+ profileImageUrl: 'assets/images/steven.jpg',
+);
+```
+
+## Task: Login & Signup Screen
+
+To check if authentication is working, We will create a new screen for Login and Signup.
+
+Create a `login_screen.dart` in the `screens` folder.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';
+import 'package:gdg_flutter_firebase_chat/services/auth_service.dart';
+ 
+class LoginScreen extends StatefulWidget {
+ @override
+ _LoginScreenState createState() => _LoginScreenState();
+}
+ 
+class _LoginScreenState extends State<LoginScreen> {
+ final _loginFormKey = GlobalKey<FormState>();
+ final _signupFormKey = GlobalKey<FormState>();
+ String _name, _email, _password;
+ int _selectedIndex = 0;
+ 
+ _buildLoginForm() {
+   return Form(
+     key: _loginFormKey,
+     child: Column(children: <Widget>[
+       _buildEmailTF(),
+       _buildPasswordTF(),
+     ]),
+   );
+ }
+ 
+ _buildSignupForm() {
+   return Form(
+     key: _signupFormKey,
+     child: Column(children: <Widget>[
+       _buildNameTF(),
+       _buildEmailTF(),
+       _buildPasswordTF(),
+     ]),
+   );
+ }
+ 
+ _buildNameTF() {
+   return Padding(
+     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+     child: TextFormField(
+       decoration: const InputDecoration(labelText: 'Name'),
+       validator: (input) =>
+           input.trim().isEmpty ? 'Please enter a vaild name' : null,
+       onSaved: (input) => _name = input.trim(),
+     ),
+   );
+ }
+ 
+ _buildEmailTF() {
+   return Padding(
+     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+     child: TextFormField(
+       decoration: const InputDecoration(labelText: 'Email'),
+       validator: (input) =>
+           !input.contains('@') ? 'Please enter a vaild email' : null,
+       onSaved: (input) => _email = input,
+     ),
+   );
+ }
+ 
+ _buildPasswordTF() {
+   return Padding(
+     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+     child: TextFormField(
+       decoration: const InputDecoration(labelText: 'Password'),
+       validator: (input) =>
+           input.length < 6 ? 'Password must be atleast 6 characters' : null,
+       onSaved: (input) => _password = input,
+       obscureText: true,
+     ),
+   );
+ }
+ 
+ _submit() async {
+   try {
+     if (_selectedIndex == 0 && _loginFormKey.currentState.validate()) {
+       _loginFormKey.currentState.save();
+       await authservice.login(_email, _password);
+     } else if (_selectedIndex == 1 &&
+         _signupFormKey.currentState.validate()) {
+       _signupFormKey.currentState.save();
+       await authservice.signup(_name, _email, _password);
+     }
+   } on PlatformException catch (error) {
+     _showErrorDialog(error.message);
+   }
+ }
+ 
+ _showErrorDialog(String errorMessage) {
+   showDialog(
+     context: context,
+     builder: (_) {
+       return AlertDialog(
+         title: Text('Error'),
+         content: Text(errorMessage),
+         actions: <Widget>[
+           FlatButton(
+               onPressed: () => Navigator.pop(context), child: Text('OK'))
+         ],
+       );
+     },
+   );
+ }
+ final AuthService authservice =  AuthService();
+ @override
+ Widget build(BuildContext context) {
+   return Scaffold(
+     body: Center(
+       child: Column(
+         mainAxisAlignment: MainAxisAlignment.center,
+         children: <Widget>[
+           Text('Welcome!',
+               style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.w600)),
+           const SizedBox(height: 10.0),
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+             children: <Widget>[
+               Container(
+                 width: 150.0,
+                 child: FlatButton(
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10.0),
+                   ),
+                   color: _selectedIndex == 0 ? AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR) : Colors.grey[300],
+                   child: Text(
+                     'Login',
+                     style: TextStyle(
+                         fontSize: 20.0,
+                         color:
+                             _selectedIndex == 0 ? Colors.white : AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR)),
+                   ),
+                   onPressed: () => setState(() => _selectedIndex = 0),
+                 ),
+               ),
+               Container(
+                 width: 150.0,
+                 child: FlatButton(
+                   shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10.0),
+                   ),
+                   color: _selectedIndex == 1 ? AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR) : Colors.grey[300],
+                   child: Text(
+                     'Sign Up',
+                     style: TextStyle(
+                         fontSize: 20.0,
+                         color:
+                             _selectedIndex == 1 ? Colors.white : AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR)),
+                   ),
+                   onPressed: () => setState(() => _selectedIndex = 1),
+                 ),
+               )
+             ],
+           ),
+           _selectedIndex == 0 ? _buildLoginForm() : _buildSignupForm(),
+           const SizedBox(height: 20.0),
+           Container(
+               width: 180,
+               child: FlatButton(
+                 shape: RoundedRectangleBorder(
+                     borderRadius: BorderRadius.circular(10.0)),
+                 color: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+                 onPressed: _submit,
+                 child: Text(
+                   'Submit',
+                   style: TextStyle(
+                     color: Colors.white,
+                     fontSize: 20.0,
+                   ),
+                 ),
+               ))
+         ],
+       ),
+     ),
+   );
+ }
+}
+
+```
+
+Positive
+: Rember to update the `home` parameter in the `main.dart` file to: `home: LoginScreen(),`
+
+## Task: Attendees Screen
+
+After login or signup we need to redirect to the screen with attendees.
+
+So let us create a new file in the `screens` folder called `attendees_screen.dart`
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+import 'package:gdg_flutter_firebase_chat/models/user_data.dart';
+import 'package:gdg_flutter_firebase_chat/services/auth_service.dart';
+import 'package:gdg_flutter_firebase_chat/services/database_service.dart';
+import 'package:gdg_flutter_firebase_chat/widgets/all_attendees_widget.dart';
+import 'package:provider/provider.dart';
+ 
+class AttendeesScreen extends StatefulWidget {
+  static final String id ='attendees_screen';
+ 
+ @override
+ _AttendeesScreenState createState() => _AttendeesScreenState();
+}
+ 
+class _AttendeesScreenState extends State<AttendeesScreen> {
+ List<User> _users = [];
+ @override
+ void initState() {
+   super.initState();
+   _setupAttendees();
+ }
+ 
+ _setupAttendees() async {
+   String currentUserId =Provider.of<UserData>(context, listen: false).currentUserId;
+   List<User> users = await Provider.of<DataBaseService>(context, listen: false)
+                     .getAllUsers(currentUserId);
+   if (mounted) {
+     setState(() {
+       _users = users;
+     });
+   }
+ }
+ @override
+ Widget build(BuildContext context) {
+   
+   return Scaffold(
+     backgroundColor: Theme.of(context).primaryColor,
+     appBar: AppBar(
+       leading: IconButton(
+         icon: Icon(Icons.menu),
+         iconSize: 30.0,
+         color: Colors.white,
+         onPressed: () {},
+       ),
+       title: Text(
+         'Attendees',
+         style: TextStyle(
+           fontSize: 28.0,
+           fontWeight: FontWeight.bold,
+         ),
+       ),
+       elevation: 0.0,
+       actions: <Widget>[
+         IconButton(
+           icon: Icon(Icons.exit_to_app),
+           onPressed: Provider.of<AuthService>(context, listen: false).logout,
+         ),
+       ],
+     ),
+     body: Column(
+       children: <Widget>[
+         Expanded(
+           child: Container(
+             decoration: BoxDecoration(
+               color: Theme.of(context).accentColor,
+               borderRadius: BorderRadius.only(
+                 topLeft: Radius.circular(30.0),
+                 topRight: Radius.circular(30.0),
+               ),
+             ),
+             child: Column(
+               children: <Widget>[
+                  AllAttendees(users:_users),
+               ],
+             ),
+           ),
+         ),
+       ],
+     ),
+   );
+ }
+}
+
+```
+
+## Task: Model to Store Current User Data
+
+To store current user data we will create a model file `user_data.dart` under `models`
+
+```dart
+import 'package:flutter/material.dart';
+ 
+class UserData extends ChangeNotifier {
+  String currentUserId;
+}
+
+```
+
+We use this class to pass data between screens, for that we will use the [provider package](https://pub.dev/packages/provider). A mixture between dependency injection (DI) and state management, built with widgets for widgets.
+
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  provider: ^4.0.5
+```
+
+Remember to get the dependencies by running this command
+
+```bash
+flutter pub get
+```
+
+Positive
+: You can find the latest version [here](https://pub.dev/packages/provider#-installing-tab-).
+
+The attendees are all the users that have registered. We update our database service and will create a new function to get all users.
+
+Firstly create a new file for the `services` folder called `database_service.dart`.
+
+```dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/constants.dart';
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+ 
+class DataBaseService {
+ Future<User> getUser(String userId) async {
+   DocumentSnapshot userDoc = await usersRef.document(userId).get();
+   return User.fromDoc(userDoc);
+ }
+ 
+ Future<List<User>> getAllUsers(String currentUserId) async {
+   QuerySnapshot userSnapshot = await usersRef.getDocuments();
+   List<User> users = [];
+   userSnapshot.documents.forEach((doc) {
+     User user = User.fromDoc(doc);
+     if (user.id != currentUserId) users.add(user);
+   });
+   return users;
+ }
+}
+
+```
+
+## Introduction to Widget - Separation of Concern
+
+Create a `widgets` folder in the `lib`folder, afterwards we will create a file in the newly created folder. Name the file: `all_attendees_widget.dart`
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+import 'package:gdg_flutter_firebase_chat/screens/chat_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+ 
+class AllAttendees extends StatelessWidget {
+ final List<User> users;
+ 
+ const AllAttendees({this.users});
+ @override
+ Widget build(BuildContext context) {
+   return Expanded(
+     child: Container(
+       decoration: BoxDecoration(
+         color: Colors.white,
+       
+       ),
+       child: Padding(
+         padding: const EdgeInsets.all(8.0),
+         child: ListView.builder(
+           itemCount: users.length,
+           itemBuilder: (BuildContext context, int index) {
+             final User user = users[index];
+             return GestureDetector(
+               onTap: () => Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                   builder: (_) => ChatScreen(
+                       // user: chat.sender,
+                       ),
+                 ),
+               ),
+               child: Container(
+                 margin: EdgeInsets.only(top: 5.0, bottom: 5.0, right: 5.0),
+                 padding:
+                     EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                 decoration: BoxDecoration(
+                   color: Color(0xFFFFEFEE),
+                   borderRadius: BorderRadius.all( Radius.circular(20.0)
+                   ),
+                 ),
+                 child: Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: <Widget>[
+                     Row(
+                       children: <Widget>[
+                         CircleAvatar(
+                           radius: 35.0,
+                           backgroundImage: user.profileImageUrl.isEmpty
+                               ? AssetImage('assets/images/user_placeholder.jpg')
+                               : CachedNetworkImageProvider(user.profileImageUrl),
+                         ),
+                         SizedBox(width: 10.0),
+                         Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: <Widget>[
+                             Text(
+                               user.name,
+                               style: TextStyle(
+                                 color: Colors.grey,
+                                 fontSize: 15.0,
+                                 fontWeight: FontWeight.bold,
+                               ),
+                             ),
+                             SizedBox(height: 5.0),
+                             Text(
+                               user.bio,
+                               style: TextStyle(
+                                 color: Colors.grey,
+                                 fontSize: 15.0,
+                               ),
+                             ),
+                           ],
+                         ),
+                       ],
+                     ),
+                   ],
+                 ),
+               ),
+             );
+           },
+         ),
+       ),
+     ),
+   );
+ }
+}
+
+```
+
+## Task: User Profile Images
+
+Profile images will come from the network, We will use the Flutter library to load and cache network images. We will be using [cached_network_image package](https://pub.dev/packages/cached_network_image).
+
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  cached_network_image: ^2.1.0+1
+```
+
+Remember to get the dependencies by running this command
+
+```bash
+flutter pub get
+```
+
+Positive
+: You can find the latest version [here](https://pub.dev/packages/cached_network_image#-installing-tab-).
+
