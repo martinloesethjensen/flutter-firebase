@@ -17,7 +17,7 @@ We will build a chat app where users can log in / sign in with Firebase, interac
 
 We will show how to setup up the app with Firebase and how to create a Firebase project.
 
-You can jump down to the Firebase section by following [this link](https://martinjensen.tech/flutter-firebase/#0).
+You can jump down to the Firebase section by following [this link](https://martinjensen.tech/flutter-firebase/#8).
 
 ## Prerequisite
 
