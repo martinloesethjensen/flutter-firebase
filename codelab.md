@@ -1351,3 +1351,870 @@ flutter pub get
 Positive
 : You can find the latest version [here](https://pub.dev/packages/cached_network_image#-installing-tab-).
 
+We got all our references now we need to navigate from main to attendees screen if we are logged in. Quickly update the login screen and give it an id. This will be used for **routes** when navigating between screens. 
+
+```dart
+class LoginScreen extends StatefulWidget {
+   static final String id ='login_screen';
+   ...
+```
+
+Positive
+: Read more about [named routes](https://flutter.dev/docs/cookbook/navigation/named-routes).
+
+## Task: Refactor main.dart
+
+We will refactor main.dart, and check if the user is logged in, we will create a new class that extends StatelessWidget.
+
+```dart
+class MyApp extends StatelessWidget {
+ Widget _getScreenId() {
+   return StreamBuilder<FirebaseUser>(
+     stream: FirebaseAuth.instance.onAuthStateChanged,
+     builder: (BuildContext context, snapshot) {
+       if (snapshot.hasData) {
+         Provider.of<UserData>(context).currentUserId = snapshot.data.uid;
+         return AttendeesScreen();
+       } else {
+         return LoginScreen();
+       }
+     },
+   );
+ }
+ 
+ // This widget is the root of your application.
+ @override
+ Widget build(BuildContext context) {
+   return MaterialApp(
+     title: "GDG Firebase chat",
+     debugShowCheckedModeBanner: false,
+     theme: ThemeData(
+       primaryColor: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+       backgroundColor:
+           AppConstants.hexToColor(AppConstants.APP_BACKGROUND_COLOR),
+       primaryColorLight:
+           AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR_LIGHT),
+       accentColor: Colors.black,
+       accentIconTheme: IconThemeData(color: Colors.black),
+       dividerColor: Colors.black12,
+       textTheme: TextTheme(
+         caption: TextStyle(color: Colors.white),
+       ),
+     ),
+     home: _getScreenId(),
+     routes: {
+       LoginScreen.id: (context) => LoginScreen(),
+       AttendeesScreen.id: (context) => AttendeesScreen(),
+     },
+   );
+ }
+}
+```
+
+Then let us modify `runApp()` to call `MyApp()`, we will also define all the **providers** for the app.
+
+```dart
+runApp(MultiProvider(providers: [
+   ChangeNotifierProvider(
+     create: (_) => UserData(),
+   ),
+   Provider<AuthService>(
+     create: (_) => AuthService(),
+   ),
+   Provider<DataBaseService>(
+     create: (_) => DataBaseService(),
+   ),
+ ], child: MyApp()));
+}
+```
+
+## Firebase Storage
+
+Here we will look at [Firebase Storage](https://firebase.google.com/docs/storage), we have images for the attendees profileImages we can store in firebase storage. For that we will create a "edit profile" screen.
+
+### Edit Profile
+
+Let us refactor some code by moving the **AppDrawer** into its own widget so it can be reused throughout the project.
+
+Create a new file in the `widgets` folder called `app_drawer_widget.dart`
+
+```dart
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+import 'package:gdg_flutter_firebase_chat/models/user_data.dart';
+import 'package:gdg_flutter_firebase_chat/screens/edit_profile_screen.dart';
+import 'package:gdg_flutter_firebase_chat/services/database_service.dart';
+import 'package:provider/provider.dart';
+ 
+class AppDrawer extends StatefulWidget {
+ @override
+ _AppDrawerState createState() => _AppDrawerState();
+}
+ 
+class _AppDrawerState extends State<AppDrawer> {
+ _buildActivity(BuildContext context, String userId) {
+   return FutureBuilder(
+       future: Provider.of<DataBaseService>(context, listen: false)
+           .getUser(userId),
+       builder: (BuildContext context, AsyncSnapshot snapshot) {
+         if (!snapshot.hasData) {
+           return SizedBox.shrink();
+         }
+         User user = snapshot.data;
+         return DrawerHeader(
+           child: Column(
+             mainAxisAlignment: MainAxisAlignment.start,
+            
+             children: <Widget>[
+               CircleAvatar(
+                 radius: 20.0,
+                 backgroundImage: user.profileImageUrl.isEmpty
+                     ? AssetImage('assets/images/user_placeholder.jpg')
+                     : CachedNetworkImageProvider(user.profileImageUrl),
+                 backgroundColor: Colors.transparent,
+               ),
+               Text(
+                 user.name,
+                 style: TextStyle(color: Colors.black),
+               ),
+               Text(
+                 user.bio,
+                 style: TextStyle(color: Colors.black),
+               ),
+               IconButton(
+                 icon: Icon(Icons.edit),
+                 tooltip: 'Edit Profile',
+                 onPressed: () => Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                     builder: (_) => EditProfileScreen(
+                       user: user,
+                     ),
+                   ),
+                 ),
+                 color:
+                     AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+               ),
+             ],
+           ),
+         );
+       });
+ }
+ 
+ @override
+ Widget build(BuildContext context) {
+   String currentUserId = Provider.of<UserData>(context).currentUserId;
+   return Drawer(
+     child: Column(
+       children: <Widget>[
+         currentUserId.isNotEmpty
+             ? _buildActivity(context, currentUserId)
+             : SizedBox.shrink(),
+         Spacer(),
+         ListTile(
+           leading: Icon(Icons.home),
+           title: Text('Home'),
+           onTap: () {},
+         ),
+         Divider(),
+         ListTile(
+           leading: Icon(Icons.people),
+           title: Text('Attendants'),
+           onTap: () {},
+         ),
+         Spacer(flex: 8),
+       ],
+     ),
+   );
+ }
+}
+```
+
+### Update Usages of the AppDrawer
+
+Update `attendees_screen.dart` to use the newly made widget. 
+
+```dart
+drawer: AppDrawer(),
+```
+
+While we are at it let us delete this.
+
+```dart
+ leading: IconButton(
+            icon: Icon(Icons.menu),
+            iconSize: 30.0,
+            color: Colors.white,
+            onPressed: () {},
+          ),
+```
+
+### Edit Profile Screen
+
+Create a new screen `edit_profile_screen.dart` in the `screens` folder.
+
+```dart
+import 'dart:io';
+ 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/app_constants.dart';
+import 'package:gdg_flutter_firebase_chat/models/user.dart';
+import 'package:gdg_flutter_firebase_chat/services/storage_service.dart';
+import 'package:gdg_flutter_firebase_chat/services/database_service.dart';
+import 'package:image_picker/image_picker.dart';
+ 
+class EditProfileScreen extends StatefulWidget {
+   static final String id = 'edit_profile_screen';
+ 
+ final User user;
+ EditProfileScreen({this.user});
+ @override
+ _EditProfileScreenState createState() => _EditProfileScreenState();
+}
+ 
+class _EditProfileScreenState extends State<EditProfileScreen> {
+ final _formKey = GlobalKey<FormState>();
+ File _profileImage;
+ String _name = '';
+ String _bio = '';
+ bool _isLoading = false;
+ @override
+ void initState() {
+   super.initState();
+   _name = widget.user.name;
+   _bio = widget.user.bio;
+ }
+ 
+ _handleImageFromGallery() async {
+   File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+   if (imageFile != null) {
+     setState(() {
+       _profileImage = imageFile;
+     });
+   }
+ }
+ 
+ _displayProfileImage() {
+   // No new profile image
+   if (_profileImage == null) {
+     // No existing profile image
+     if (widget.user.profileImageUrl.isEmpty) {
+       // Display placeholder
+       return AssetImage('assets/images/user_placeholder.jpg');
+     } else {
+       // User profile image exists
+       return CachedNetworkImageProvider(widget.user.profileImageUrl);
+     }
+   } else {
+     // New profile image
+     return FileImage(_profileImage);
+   }
+ }
+ 
+ _submit() async {
+   if (_formKey.currentState.validate() && !_isLoading) {
+     _formKey.currentState.save();
+ 
+     setState(() {
+       _isLoading = true;
+     });
+ 
+     // Update user in database
+     String _profileImageUrl = '';
+ 
+     if (_profileImage == null) {
+       _profileImageUrl = widget.user.profileImageUrl;
+     } else {
+       _profileImageUrl = await StorageService.uploadUserProfileImage(
+         widget.user.profileImageUrl,
+         _profileImage,
+       );
+     }
+ 
+     User user = User(
+       id: widget.user.id,
+       name: _name,
+       profileImageUrl: _profileImageUrl,
+       bio: _bio,
+     );
+     // Database update
+     DataBaseService.updateUser(user);
+ 
+     Navigator.pop(context);
+   }
+ }
+ 
+ @override
+ Widget build(BuildContext context) {
+   return Scaffold(
+     backgroundColor: Colors.white,
+     appBar: AppBar(
+       backgroundColor: Colors.white,
+       title: Text(
+         'Edit Profile',
+         style: TextStyle(color: Colors.black),
+       ),
+     ),
+     body: GestureDetector(
+       onTap: () => FocusScope.of(context).unfocus(),
+       child: ListView(
+         children: <Widget>[
+           _isLoading
+               ? LinearProgressIndicator(
+                   backgroundColor: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+                   valueColor: AlwaysStoppedAnimation(AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR)),
+                 )
+               : SizedBox.shrink(),
+           Padding(
+             padding: const EdgeInsets.all(30.0),
+             child: Form(
+               key: _formKey,
+               child: Column(
+                 children: <Widget>[
+                   CircleAvatar(
+                     radius: 60.0,
+                     backgroundColor: Colors.grey,
+                     backgroundImage: _displayProfileImage(),
+                   ),
+                   FlatButton(
+                     onPressed: _handleImageFromGallery,
+                     child: Text(
+                       'Change Profile Image',
+                       style: TextStyle(
+                           color: Theme.of(context).accentColor,
+                           fontSize: 16.0),
+                     ),
+                   ),
+                   TextFormField(
+                     initialValue: _name,
+                     style: TextStyle(fontSize: 18.0),
+                     decoration: InputDecoration(
+                       icon: Icon(
+                         Icons.person,
+                         size: 30.0,
+                       ),
+                       labelText: 'Name',
+                     ),
+                     validator: (input) => input.trim().length < 1
+                         ? 'Please enter a valid name'
+                         : null,
+                     onSaved: (input) => _name = input,
+                   ),
+                   TextFormField(
+                     initialValue: _bio,
+                     style: TextStyle(fontSize: 18.0),
+                     decoration: InputDecoration(
+                       icon: Icon(
+                         Icons.book,
+                         size: 30.0,
+                       ),
+                       labelText: 'Bio',
+                     ),
+                     validator: (input) => input.trim().length > 150
+                         ? 'Please enter a bio less than 150 characters'
+                         : null,
+                     onSaved: (input) => _bio = input,
+                   ),
+                   Container(
+                     margin: EdgeInsets.all(40.0),
+                     height: 40.0,
+                     width: 250.0,
+                     child: FlatButton(
+                       onPressed: _submit,
+                       color: AppConstants.hexToColor(AppConstants.APP_PRIMARY_COLOR),
+                       textColor: Colors.white,
+                       child: Text(
+                         'Save Profile',
+                         style: TextStyle(fontSize: 18.0),
+                       ),
+                     ),
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         ],
+       ),
+     ),
+   );
+ }
+}
+```
+
+## Task: Storing Profile Image
+
+We will need to update the `database_service.dart` file and add a new function.
+
+```dart
+static void updateUser(User user) {
+   usersRef.document(user.id).updateData({
+     'name': user.name,
+     'profileImageUrl': user.profileImageUrl,
+     'bio': user.bio,
+   });
+}
+```
+
+For storing a profile image we will need a new service, `storage_service.dart` in the `service` folder. Here we will create functions to handle the upload of user profile image.
+
+```dart
+import 'dart:io';
+ 
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:gdg_flutter_firebase_chat/helpers/constants.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+ 
+class StorageService {
+ static Future<String> uploadUserProfileImage(
+     String url, File imageFile) async {
+   String photoId = Uuid().v4();
+   File image = await compressImage(photoId, imageFile);
+ 
+   if (url.isNotEmpty) {
+     // Updating user profile image
+     RegExp exp = RegExp(r'userProfile_(.*).jpg');
+     photoId = exp.firstMatch(url)[1];
+   }
+ 
+   StorageUploadTask uploadTask = storageRef
+       .child('images/users/userProfile_$photoId.jpg')
+       .putFile(image);
+   StorageTaskSnapshot storageSnap = await uploadTask.onComplete;
+   String downloadUrl = await storageSnap.ref.getDownloadURL();
+   return downloadUrl;
+ }
+ 
+ static Future<File> compressImage(String photoId, File image) async {
+   final tempDir = await getTemporaryDirectory();
+   final path = tempDir.path;
+   File compressedImageFile = await FlutterImageCompress.compressAndGetFile(
+     image.absolute.path,
+     '$path/img_$photoId.jpg',
+     quality: 70,
+   );
+   return compressedImageFile;
+ }
+}
+```
+
+We used few new packages in the new code lets add them to `pubspec.yaml` and run `flutter pub get`
+
+```yaml
+dependencies:
+	flutter_image_compress: ^0.6.5+1
+  path_provider: ^1.6.5
+  uuid: ^2.0.4
+  image_picker: ^0.6.3+4
+```
+
+You can install packages from the command line:
+
+```bash
+flutter pub get
+```
+
+Positive
+: Links for the packages:
+[flutter_image_compress](https://pub.dev/packages/flutter_image_compress)
+[
+path_provider](https://pub.dev/packages/path_provider)
+[
+uuid](https://pub.dev/packages/uuid)
+[
+image_picker](https://pub.dev/packages/image_picker)
+
+Negative
+: iOS need some special setting in the `<project root>/ios/Runner/Info.plist`. Please refeer to the readme tab for [image_picker](https://pub.dev/packages/image_picker#ios). 
+We will only need to specify `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription` in the `Info.plist`.
+
+## Task: Update the Chat Screen
+
+Now let us finish the chat application and save the chat messages to the database (Firestore)
+
+### Database Service
+
+We will update the `DatabaseService` 
+
+```dart
+Future<List<Message>> getChatMessages(String senderId, String receiverId) async {
+   List<Message> messages = [];
+   QuerySnapshot messagesSenderQuerySnapshot = await chatsRef
+       .where('senderId', isEqualTo: senderId)
+       .where('toUserId', isEqualTo: receiverId)
+       .orderBy('timestamp', descending: true)
+       .getDocuments();
+ 
+   messagesSenderQuerySnapshot.documents.forEach((doc) {
+     print(doc.documentID);
+     messages.add(Message.fromDoc(doc));
+   });
+   QuerySnapshot messagestoQuerySnapshot = await chatsRef
+       .where('senderId', isEqualTo: receiverId)
+       .where('toUserId', isEqualTo: senderId)
+       .orderBy('timestamp', descending: true)
+       .getDocuments();
+ 
+   messagestoQuerySnapshot.documents.forEach((doc) {
+     print(doc.documentID);
+     messages.add(Message.fromDoc(doc));
+   });
+ 
+   Comparator<Message> timestampComparator =
+       (a, b) => b.timestamp.compareTo(a.timestamp);
+   messages.sort(timestampComparator);
+   return messages;
+}
+ 
+void sendChatMessage(Message message) {
+   chatsRef.add({
+     'senderId': message.senderId,
+     'toUserId': message.toUserId,
+     'text': message.text,
+     'imageUrl': message.imageUrl,
+     'isLiked': message.isLiked,
+     'unread': message.unread,
+     'timestamp': Timestamp.fromDate(DateTime.now()),
+   });
+}
+```
+
+## Task: Update Message Model
+
+We need to update our `Message` model, and introduce "from sender" and "to sender" and new fields, also it will have a function that maps database values into objects.
+
+```dart
+class Message {
+  final String id, senderId, toUserId, text, imageUrl;
+  final bool isLiked;
+  final bool unread;
+  final Timestamp timestamp;
+ 
+  Message({
+    this.id,
+    this.senderId,
+    this.toUserId,
+    this.text,
+    this.imageUrl,
+    this.isLiked,
+    this.unread,
+    this.timestamp,
+  });
+ 
+  factory Message.fromDoc(DocumentSnapshot doc) {
+    return Message(
+        id: doc.documentID,
+        senderId: doc['senderId'],
+        toUserId: doc['toUserId'],
+        text: doc['text'],
+        imageUrl: doc['imageUrl'],
+        isLiked: doc['isLiked'],
+        unread: doc['unread'],
+        timestamp: doc['timestamp']);
+  }
+}
+```
+
+We will add `dateFormat` to our `constants.dart` file
+
+```dart
+final DateFormat timeFormat = DateFormat('E, h:mm a');
+```
+
+We will use `intl` package to use `DateFormat`.
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  intl: ^0.16.1
+```
+
+Remember to get the dependencies by running this command
+
+```bash
+flutter pub get
+```
+
+Positive
+: You can find the latest version [here](https://pub.dev/packages/intl#-installing-tab-).
+
+## Task: Refactor Chat Screen
+
+That `chat_screen.dart` will need to take 2 parameters, from which user message is coming from and to sender.
+
+```dart
+ final String currentUserId;
+ final String toUserId;
+ 
+ ChatScreen({this.currentUserId, this.toUserId});
+```
+
+We need to bring messages from our database.
+
+Therefore, delete this as it won't be needed.
+
+```dart
+final List<Message> _messages = messages;
+```
+
+And instead add this.
+
+```dart
+DataBaseService _dataBaseService;
+List<Message> _messages = [];
+ 
+@override
+void initState() {
+   super.initState();
+     _dataBaseService = Provider.of<DataBaseService>(context, listen: false);
+ 
+   _setupMessages();
+}
+ 
+_setupMessages() async {
+   List<Message> messages = await _dataBaseService.getChatMessages(
+       widget.currentUserId, widget.toUserId);
+   setState(() {
+     _messages = messages;
+   });
+}
+```
+
+Update message time with this.
+
+```dart
+...
+Text('${timeFormat.format(message.timestamp.toDate())}',
+...)
+```
+
+In `_handleSubmitted(...)` update code to pass the new values and call the database service.
+
+```dart
+void _handleSubmitted(String text) {
+   _textMessageController.clear();
+ 
+   setState(() {
+     _isComposing = false;
+   });
+   Message message = Message(
+     senderId: widget.currentUserId,
+     toUserId: widget.toUserId,
+     timestamp: Timestamp.fromDate(DateTime.now()),
+     text: text,
+     isLiked: true,
+     unread: true,
+   );
+   setState(() {
+     _messages.insert(0, message);
+   });
+   
+   _dataBaseService.sendChatMessage(message);
+}
+```
+
+And finally update the `isMe` code to get value from the widget.
+
+```dart
+final bool isMe = message.senderId == widget.currentUserId;
+```
+
+### Update `all_attendees_widget`
+
+Chat screen is called through the attendees screen. Therefore, we need to update the `all_attendees_widget.dart`.
+
+In the `build` method we need to get the current user id.
+
+```dart
+Widget build(BuildContext context) {
+    String currentUserId = Provider.of<UserData>(context, listen: false).currentUserId;
+		...
+```
+
+We then need to pass it to `ChatScreen` when we do the navigation.
+
+```dart
+return GestureDetector(
+    onTap: () => Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          currentUserId: currentUserId,
+          toUserId: user.id,
+        ),
+      ),
+    ),
+  ...
+```
+
+## Task: Sending Pictures in Messages
+
+We would like to send pictures in the chat.
+
+So in our `storage_service.dart` we will add a new function `uploadMessageImage`.
+
+```dart
+Future<String> uploadMessageImage(File imageFile) async {
+   String imageId = Uuid().v4();
+   File image = await compressImage(imageId, imageFile);
+ 
+   String downloadUrl = await _uploadImage(
+     'images/messages/message_$imageId.jpg',
+     imageId,
+     image,
+   );
+   return downloadUrl;
+}
+```
+
+In `chat_screen.dart` we will then update `_buildMessage()`.
+
+```dart
+...
+	children: <Widget>[
+           message.imageUrl == null
+               ? _buildText(isMe, message)
+               : _buildImage(context, message),
+           SizedBox(height: 8.0),
+  ...
+```
+
+We will also add new methods before the build.
+
+```dart
+_buildText(bool isMe,Message message) {
+   return Text(
+             message.text,
+             style: TextStyle(
+               color: isMe ? Colors.white60 : Colors.blueGrey,
+               fontSize: 12.0,
+               fontWeight: FontWeight.w600,
+             ),
+           );
+}
+
+_buildImage(BuildContext context,Message message) {
+   final size = MediaQuery.of(context).size;
+   return Container(
+     height: size.height * 0.2,
+     width: size.width * 0.6,
+     decoration: BoxDecoration(
+         borderRadius: BorderRadius.circular(20.0),
+         image: DecorationImage(
+           fit: BoxFit.cover,
+           image: CachedNetworkImageProvider(message.imageUrl),
+         )),
+   );
+}
+```
+
+Add to `onPressed` of our camera icon.
+
+```dart
+...
+	children: <Widget>[
+         RawMaterialButton(
+           onPressed: () async {
+             File imageFile = await ImagePicker.pickImage(
+               source: ImageSource.gallery,
+             );
+             if (imageFile != null) {
+               String imageUrl =
+                   await Provider.of<StorageService>(context, listen: false)
+                       .uploadMessageImage(imageFile);
+               _handleSubmitted(null, imageUrl);
+             }
+           },
+  ...
+```
+
+Update `_handleSubmitted` to take an additional parameter.
+
+```dart
+void _handleSubmitted(String text, String imageUrl) {
+   if ((text != null && text.trim().isNotEmpty) || imageUrl != null) {
+     if (imageUrl == null) {
+       //text message
+ 
+       setState(() {
+         _isComposing = false;
+       });
+     }
+     Message message = Message(
+       senderId: widget.currentUserId,
+       toUserId: widget.toUserId,
+       imageUrl: imageUrl,
+       timestamp: Timestamp.fromDate(DateTime.now()),
+       text: text,
+       isLiked: true,
+       unread: true,
+     );
+     setState(() {
+       _messages.insert(0, message);
+     });
+     _dataBaseService.sendChatMessage(message);
+   }
+}
+```
+
+And update its usages
+
+```dart
+...
+  	onPressed: _isComposing
+               ? () => _handleSubmitted(
+                     _textMessageController.text,
+                     null,
+                   )
+               : null,
+...
+```
+
+Finally we should add a `Provider` for the `StorageService` class in `main.dart`
+
+```dart
+...
+Provider<StorageService>(
+   create: (_) => StorageService(),
+),
+...
+```
+
+### Add Image in App Bar
+
+On the `chat_screen.dart` lets add whom we modify the app bar to include profile image and name.
+
+```dart
+...
+  appBar: AppBar(
+       title: Row(
+         children: <Widget>[
+           CircleAvatar(
+               radius: 25.0,
+               backgroundImage: widget.toUser.profileImageUrl.isEmpty
+                   ? // Display placeholder
+                   AssetImage('assets/images/user_placeholder.jpg')
+                   : CachedNetworkImageProvider(
+                       widget.toUser.profileImageUrl)),
+           SizedBox(width: 10.0),
+           Text(
+             widget.toUser.name,
+             style: TextStyle(
+               fontSize: 18.0,
+               fontWeight: FontWeight.bold,
+             ),
+           ),
+         ],
+       ),
+       elevation: 10.0,       
+     ),
+...
+```
+
+## The End
+
+TODO: Have links and other stuff
